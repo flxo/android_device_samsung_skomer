@@ -11,9 +11,8 @@ You may obtain a copy of the License at
 
 
 
-
-This device specific files can be used to build a CWM based recovery for the Samsung GT-S7710 (skomer). Work is in
-progress. The CWM port is untested and may not work as expected.
+This device specific files can be used to build a CWM based recovery for the Samsung GT-S7710 (skomer). Work is in progress.
+The CWM port is untested and may not work as expected. Use at your own risk.
 
 
 Build instructions:
@@ -34,7 +33,7 @@ create a xml file unter .repo/local_manifests with the following content:
  <project path="kernel/samsung/skomer" name="flxo/skomer_kernel" revision="master" />
 </manifest>
 
-You can skip the kernel cause cause currently a prebuild kernel is used.
+You can also skip the kernel project cause a prebuild kernel is currently used.
 
 3. sync 
 
@@ -50,7 +49,8 @@ this may take while.
 
 5. flash 
 
+# sudo heimdall flash --pit skomer.pit --Kernel2 out/target/product/skomer/recovery.img
 
 
 
-Thanks to CyanogenMod, TheBoegl
+Thanks to CyanogenMod and TheBoegl!
