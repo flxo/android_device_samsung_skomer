@@ -29,7 +29,7 @@ create a xml file unter .repo/local_manifests with the following content:
 
 <?xml version="1.0" encoding="UTF-8"?>
 <manifest>
- <project path="device/samsung/skomer" name="flxo/android_device_samsung_skomer" revision="master" />
+ <project path="device/samsung/skomer" name="flxo/android_device_samsung_skomer" />
  <project path="kernel/samsung/skomer" name="flxo/skomer_kernel" revision="master" />
 </manifest>
 
