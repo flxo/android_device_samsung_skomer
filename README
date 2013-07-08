@@ -33,8 +33,6 @@ create a xml file unter .repo/local_manifests with the following content:
  <project path="kernel/samsung/skomer" name="flxo/skomer_kernel" revision="master" />
 </manifest>
 
-You can also skip the kernel project cause a prebuild kernel is currently used.
-
 3. sync 
 
 # repo sync
