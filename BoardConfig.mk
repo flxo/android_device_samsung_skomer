@@ -23,44 +23,17 @@ BOARD_SYSTEMIMAGE_PARTITION_SIZE := 0x4B000000
 BOARD_USERDATAIMAGE_PARTITION_SIZE := 0x4CBB4000
 BOARD_FLASH_BLOCK_SIZE := 131072
 
-TARGET_RECOVERY_INITRC = device/samsung/skomer/recovery/root/init.rc
-BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/skomer/recovery/graphics.c
-BOARD_HAS_NO_MISC_PARTITION := true
-BOARD_SUPPRESS_EMMC_WIPE := true
-BOARD_HAS_NO_MISC_PARTITION := true
-
 # Kernel
 TARGET_KERNEL_SOURCE := kernel/samsung/skomer
 TARGET_KERNEL_CONFIG := skomer_defconfig
 TARGET_USE_ST_ERICSSON_KERNEL := true
 
 # Recovery
-BOARD_HAS_NO_SELECT_BUTTON := true
+# uncomment this to use the stock kernel for recovery
 #TARGET_PREBUILT_RECOVERY_KERNEL := device/samsung/skomer/recovery/recovery_kernel
 TARGET_RECOVERY_INITRC = device/samsung/skomer/recovery/root/init.rc
 BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/skomer/recovery/graphics.c
+BOARD_HAS_NO_SELECT_BUTTON := true
 BOARD_HAS_NO_MISC_PARTITION := true
 BOARD_SUPPRESS_EMMC_WIPE := true
-BOARD_HAS_NO_MISC_PARTITION := true
-
-# TODO recovery/twrp-graphics.c: please see the file for comments
-TW_BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/skomer/recovery/twrp-graphics.c
-DEVICE_RESOLUTION := 480x800
-RECOVERY_SDCARD_ON_DATA := true
-TW_INTERNAL_STORAGE_PATH := "/data/media"
-TW_INTERNAL_STORAGE_MOUNT_POINT := "data"
-TW_EXTERNAL_STORAGE_PATH := "/sdcard"
-TW_EXTERNAL_STORAGE_MOUNT_POINT := "/sdcard"
-TW_NO_REBOOT_BOOTLOADER := true
-TW_HAS_DOWNLOAD_MODE := true
-BOARD_HAS_NO_REAL_SDCARD := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/virtual/android_usb/android0/f_mass_storage/lun/file
-
-TW_INCLUDE_CRYPTO_SAMSUNG := true
-TW_INCLUDE_CRYPTO := true
-TW_CRYPTO_FS_TYPE := "ext4"
-TW_CRYPTO_REAL_BLKDEV := "/dev/block/mmcblk0p25"
-TW_CRYPTO_MNT_POINT := "/data"
-TW_CRYPTO_FS_OPTIONS := "noatime,nosuid,nodev,discard,noauto_da_alloc,journal_async_commit,errors=panic    wait,check"
-TW_CRYPTO_FS_FLAGS := "0x00000406"
-TW_CRYPTO_KEY_LOC := "footer"
