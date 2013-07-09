@@ -34,6 +34,4 @@ TARGET_USE_ST_ERICSSON_KERNEL := true
 TARGET_RECOVERY_INITRC = device/samsung/skomer/recovery/root/init.rc
 BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/skomer/recovery/graphics.c
 BOARD_HAS_NO_SELECT_BUTTON := true
-BOARD_HAS_NO_MISC_PARTITION := true
-BOARD_SUPPRESS_EMMC_WIPE := true
 TARGET_USE_CUSTOM_LUN_FILE_PATH := /sys/devices/virtual/android_usb/android0/f_mass_storage/lun/file
