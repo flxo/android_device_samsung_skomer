@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Galaxy S Advance Settings</string>
+    
+    
+    <string name="category_general_title">General</string>
+       
+    <string name="radio_subcat_title">Radio mode</string>
+    <string name="hspa_title_head">HSPA</string>
+    <string name="hspa_summary_head">Enable HSDPA/HSUPA</string>
+    
+    <string name="vibrator_subcat_title">Vibrator</string>
+    <string name="vibrator_intensity_title_head">Vibrator Intensity</string>
+    <string name="vibrator_intensity_summary_head">Set vibrator intensity</string>
+    
+    <string name="advanced_subcat_title">Advanced</string>
+    <string name="deepest_sleep_title_head">Deepest sleep state</string>
+    <string name="deepest_sleep_summary_head">Specify the highest deep sleep level</string>
+
+    <string name="category_screen_title">Screen</string>
+    
+    <string name="screen_colors_title">Colors</string>
+    <string name="panel_gamma_title_head">Screen Gamma</string>
+    <string name="panel_gamma_summary_head">Set screen gamma value</string>
+
+    <string name="touchscreen_subcat_title">Touchscreen</string>
+    <string name="touchscreen_sensitivity_title_head">Touch sensitivity</string>
+    <string name="touchscreen_sensitivity_summary_head">Set touch panel sensitivity</string>
+
+    <string name="touchkey_subcat_title">Touchkeys</string>
+    <string name="touchkey_light_title_head">Enable keys backlight</string>
+    <string name="touchkey_light_summary_head">Light up touchkeys when screen is on</string> 
+    <string name="touchkey_timeout_title_head">Backlight timeout</string>
+    <string name="touchkey_timeout_summary_head">Delay after a keypress before backlight turns off</string>
+    
+    <string name="crt_off_subcat_title">CRT-OFF Effect</string>
+    <string name="crt_off_title_head">FB Early Suspend Delay</string>
+    <string name="crt_off_summary_head">Enable / Disable framebuffer early suspend delay, it will enable the crt-off effect</string>
+    <string name="crt_off_delay_title_head">Delay in ms</string>
+    <string name="crt_off_delay_summary_head">Amount in milliseconds to wait before the screen turns off</string>
+
+    <string name="accelerometer_subcat_title">Accelerometer</string>
+    <string name="use_accelerometer_calibration_title_head">Use calibration data</string>
+    <string name="use_accelerometer_calibration_summary_head">Use the accelerometer calibration values. Do a calibration after checking this!</string>
+    <string name="calibrate_accelerometer_title_head">Calibrate</string>
+    <string name="calibrate_accelerometer_summary_head">Put your phone on a flat surface, and press this to calibrate</string>
+    <string name="accelerometer_dialog_head">Calibration done</string>
+    <string name="accelerometer_dialog_message">The sensor has been successfully calibrated.</string>
+
+    <string name="category_usb_title">Usb</string>
+       
+    <string name="otg_subcat_title">USB OTG Settings</string>
+    <string name="otg_power_title_head">USB-OTG Power</string>
+    <string name="otg_power_summary_head">Enables output voltage to the USB port</string>
+    
+    <string name="cc_subcat_title">Charger control</string>
+    
+    <string name="ac_cc_title_head">Wall charger currency</string>
+    <string name="ac_cc_summary_head">Wall charger currency in mAh, low levels protect battery but takes longer to charge, high levels may damage the battery life</string>
+
+    <string name="usb_cc_title_head">USB cable currency</string>
+    <string name="usb_cc_summary_head">USB cable currency in mAh, useful to implement Fast Charge, low levels protect battery but takes longer to charge, high levels may damage the battery life</string>
+    
+    
+</resources>

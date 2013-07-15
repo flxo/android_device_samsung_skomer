@@ -1,2 +1,2 @@
 PRODUCT_MAKEFILES := \
-    $(LOCAL_DIR)/device_skomer.mk
+    $(LOCAL_DIR)/full_skomer.mk

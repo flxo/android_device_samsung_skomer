@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:title="@string/app_name">
+
+    <PreferenceCategory
+                android:title="@string/screen_colors_title">
+
+    <!-- Panel gamma -->
+    <com.cyanogenmod.settings.device.PanelGamma
+        android:defaultValue="0"
+        android:entries="@array/panel_gamma_entries"
+        android:entryValues="@array/panel_gamma_entries_values"
+        android:key="panel_gamma"
+        android:summary="@string/panel_gamma_summary_head"
+        android:title="@string/panel_gamma_title_head" />
+
+    </PreferenceCategory>
+    <PreferenceCategory
+                android:title="@string/touchscreen_subcat_title">
+    <com.cyanogenmod.settings.device.TouchscreenSensitivity
+                android:key="touchscreen_sensitivity"
+                android:title="@string/touchscreen_sensitivity_title_head"
+                android:summary="@string/touchscreen_sensitivity_summary_head"
+                android:entries="@array/touchscreen_sensitivity_entries"
+                android:entryValues="@array/touchscreen_sensitivity_entries_values"
+                android:defaultValue="50" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+                android:title="@string/touchkey_subcat_title">
+    <!-- Touchkey backlight -->
+    <CheckBoxPreference
+                android:key="touchkey_light"
+                android:title="@string/touchkey_light_title_head"
+                android:summary="@string/touchkey_light_summary_head"
+                android:defaultValue="true"
+                />
+ 
+   
+     <com.cyanogenmod.settings.device.TouchkeyTimeout
+                android:key="touchkey_timeout"
+                android:title="@string/touchkey_timeout_title_head"
+                android:summary="@string/touchkey_timeout_summary_head"
+                android:entries="@array/touchkey_timeout_entries"
+                android:entryValues="@array/touchkey_timeout_entries_values"
+                android:defaultValue="3"
+                />
+     
+    </PreferenceCategory> 
+    
+    
+       <PreferenceCategory
+                android:title="@string/crt_off_subcat_title">
+    <!-- CRT-OFF effect -->
+    <CheckBoxPreference
+                android:key="fb_earlysuspend_delay"
+                android:title="@string/crt_off_title_head"
+                android:summary="@string/crt_off_summary_head"
+                android:defaultValue="true"
+                />
+    <com.cyanogenmod.settings.device.FbDelay
+                android:key="fb_earlysuspend_delay_ms"
+                android:title="@string/crt_off_delay_title_head"
+                android:summary="@string/crt_off_delay_summary_head"
+                android:entries="@array/fb_earlysuspend_delay_entries"
+                android:entryValues="@array/fb_earlysuspend_delay_entries_values"
+                android:defaultValue="1"
+                />
+    </PreferenceCategory>
+    
+</PreferenceScreen>
