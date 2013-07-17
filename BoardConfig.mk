@@ -64,9 +64,6 @@ TARGET_PROVIDES_INIT := true
 TARGET_PROVIDES_INIT_TARGET_RC := true
 
 
-# Vibrator
-BOARD_HAS_VIBRATOR_IMPLEMENTATION := ../../device/samsung/skomer/vibrator/vibrator.c
-
 # Kernel
 #TARGET_KERNEL_SOURCE := kernel/samsung/u8500
 TARGET_KERNEL_SOURCE := kernel/samsung/skomer
