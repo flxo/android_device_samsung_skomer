@@ -32,6 +32,7 @@ $(call inherit-product-if-exists, vendor/samsung/skomer/skomer-vendor-blobs.mk)
 
 # Ramdisk
 PRODUCT_COPY_FILES += \
+    device/samsung/skomer/prebuilt/root/init.rc:root/init.rc \
     device/samsung/skomer/prebuilt/root/default.prop:root/default.prop \
     device/samsung/skomer/prebuilt/root/init.samsungskomer.rc:root/init.samsungskomer.rc \
     device/samsung/skomer/prebuilt/root/init.samsungskomer.bt.rc:root/init.samsungskomer.bt.rc \
@@ -53,13 +54,7 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     device/samsung/skomer/prebuilt/system/etc/media_profiles.xml:system/etc/media_profiles.xml \
     device/samsung/skomer/prebuilt/system/etc/media_codecs.xml:system/etc/media_codecs.xml \
-    device/samsung/skomer/prebuilt/system/omxloaders:system/omxloaders \
-    device/samsung/skomer/prebuilt/system/etc/omxlibs.txt:system/etc/omxlibs.txt \
-    device/samsung/skomer/prebuilt/system/etc/init.d/01omx:system/etc/init.d/01omx
-
-# Egrep
-PRODUCT_COPY_FILES += \
-    device/samsung/skomer/prebuilt/system/bin/egrep:system/bin/egrep
+    device/samsung/skomer/prebuilt/system/omxloaders:system/omxloaders
 
 # Dbus
 PRODUCT_COPY_FILES += \
@@ -68,8 +63,6 @@ PRODUCT_COPY_FILES += \
 # Wifi
 PRODUCT_COPY_FILES += \
     device/samsung/skomer/prebuilt/system/etc/wifi/wpa_supplicant.conf:system/etc/wifi/wpa_supplicant.conf
-PRODUCT_PACKAGES += \
-    libnetcmdiface
 
 # STE Modem and CSPSA
 PRODUCT_COPY_FILES += \
@@ -124,6 +117,7 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.com.google.locationfeatures = 1 \
     ro.setupwizard.mode=OPTIONAL \
     ro.setupwizard.enable_bypass=1 \
+    net.bt.name=Android \
     ro.config.sync=yes
 
 # Define kind of DPI
