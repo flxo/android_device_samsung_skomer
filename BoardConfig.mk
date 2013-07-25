@@ -36,7 +36,6 @@ TARGET_ARCH_VARIANT_CPU := cortex-a9
 TARGET_CPU_SMP := true
 TARGET_CPU_ABI := armeabi-v7a
 TARGET_CPU_ABI2 := armeabi
-ARCH_ARM_HAVE_NEON := true
 ARCH_ARM_HAVE_TLS_REGISTER := true
 TARGET_GLOBAL_CFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
 TARGET_GLOBAL_CPPFLAGS += -mtune=cortex-a9 -mfpu=neon -mfloat-abi=softfp
@@ -57,12 +56,11 @@ TARGET_USE_ST_ERICSSON_KERNEL := true
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_RECOVERY_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 2048
-BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x02000000
+BOARD_FORCE_RAMDISK_ADDRESS := 0x02000000
 
 # Graphics
 USE_OPENGL_RENDERER := true
 BOARD_EGL_CFG := device/samsung/skomer/prebuilt/system/lib/egl/egl.cfg
-BOARD_EGL_NEEDS_LEGACY_FB := true
 
 # Screen
 TARGET_SCREEN_HEIGHT := 800
@@ -71,8 +69,6 @@ TARGET_SCREEN_WIDTH := 480
 # Bluetooth
 BOARD_HAVE_BLUETOOTH := true
 BOARD_HAVE_BLUETOOTH_BCM := true
-BOARD_BLUETOOTH_BDROID_BUILDCFG_INCLUDE_DIR := device/samsung/skomer/bluetooth
-BOARD_BLUEDROID_VENDOR_CONF := device/samsung/skomer/bluetooth/btvendor_skomer.txt
 
 # Wifi
 BOARD_WLAN_DEVICE := bcmdhd
@@ -92,16 +88,12 @@ WIFI_DRIVER_MODULE_ARG := "firmware_path=/system/etc/wifi/bcmdhd_sta.bin_b2 nvra
 WIFI_DRIVER_MODULE_AP_ARG := "firmware_path=/system/etc/wifi/bcmdhd_apsta.bin_b2 nvram_path=/system/etc/wifi/nvram_net.txt_GPIO4"
 WIFI_BAND := 802_11_ABG
 
-# RIL
-BOARD_RIL_CLASS := ../../../device/samsung/skomer/ril/
-
 # Browser
 ENABLE_WEBGL := true
 
 # Audio
 BOARD_USES_GENERIC_AUDIO := false
 BOARD_USES_ALSA_AUDIO := true
-COMMON_GLOBAL_CFLAGS += -DMR0_AUDIO_BLOB
 
 # USB Mounting
 BOARD_UMS_LUNFILE := "/sys/class/android_usb/android0/f_mass_storage/lun0/file"
@@ -113,6 +105,7 @@ BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
 BOARD_VOLD_DISC_HAS_MULTIPLE_MAJORS := true
 
 # Recovery
+TARGET_PROVIDES_INIT_RC := true
 BOARD_HAS_NO_SELECT_BUTTON := true
 TARGET_RECOVERY_INITRC = device/samsung/skomer/recovery/recovery.rc
 BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/skomer/recovery/graphics.c
