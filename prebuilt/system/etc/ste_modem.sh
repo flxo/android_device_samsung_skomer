@@ -42,7 +42,7 @@ if ls $TRACE_AUTO_CONF > /dev/null ; then
 chown radio.radio $TRACE_AUTO_CONF
 fi
 if ls $JIG_SMD > /dev/null ; then
-	chown radio.system $JIG_SMD
+	chown radio.radio $JIG_SMD
 fi
 								
 # Start CSPSA2NWM which uses CSPSA server to copy radio parameters
