@@ -4,26 +4,17 @@
 import /init.${ro.hardware}.usb.rc
 import /init.${ro.hardware}.bt.rc
 
-on init
-
-    mkdir /mnt/shell/emulated 0700 shell shell
+on early-init
+    export EXTERNAL_STORAGE /storage/sdcard0 
     mkdir /storage 0550 system sdcard_r
-    mkdir /storage/emulated 0555 root root
-    mkdir /storage/sdcard1 0775 system system
-
-    export EXTERNAL_STORAGE /storage/emulated/legacy
+    mkdir /storage/sdcard0 0000 system system
+    symlink /storage/sdcard0 /sdcard
+    symlink /storage/sdcard0 /mnt/sdcard
+    symlink /storage/sdcard1 /mnt/sdcard1
     export SECONDARY_STORAGE /storage/sdcard1
-    export EMULATED_STORAGE_SOURCE /mnt/shell/emulated
-    export EMULATED_STORAGE_TARGET /storage/emulated
+    mkdir /storage/sdcard1 0000 system system
 
-    # For backwards compatibility
-    symlink /storage/emulated/legacy /sdcard
-    symlink /storage/emulated/legacy /mnt/sdcard
-    symlink /storage/emulated/legacy /storage/sdcard0
-    symlink /mnt/shell/emulated/0 /storage/emulated/legacy
-    symlink /storage/sdcard1 /extSdCard
-    symlink /storage/sdcard1 /mnt/extSdCard
-
+on init
     export LD_LIBRARY_PATH /vendor/lib:/system/lib:/system/lib/ste_omxcomponents
     export OMX_STE_ENS_COMPONENTS_DIR /system/lib/ste_omxcomponents/
     export OMX_BELLAGIO_LOADER_REGISTRY /system/omxloaders
@@ -280,7 +271,7 @@ on post-fs
 on post-fs-data
 
     # create basic filesystem structure
-    mkdir /data/media 0775 media_rw media_rw
+    mkdir /data/media 0770 media_rw media_rw
     chown media_rw media_rw /data/media
     mkdir /data/misc/psdata
     mkdir /data/misc/bluetoothd 0770 bluetooth bluetooth
@@ -464,11 +455,8 @@ service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -n -d
     group bluetooth net_bt_admin misc
     disabled
 
-# create virtual SD card at /mnt/sdcard, based on the /data/media directory
-# daemon will drop to user/group system/media_rw after initializing
-# underlying files in /data/media wil be created with user and group media_rw (1023)
-service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
-    class late_start
+service sdcard /system/bin/sdcard /data/media 1023 1023
+     class late_start
 
 # Crash Safe Parameter Storage Area, serving production parameter requests from clients.
 # Configuration is read from file "/etc/cspsa.conf" and each found area spawns a CSPSA server
@@ -523,11 +511,6 @@ service atd /system/bin/at_core -mode normal -serial ttyAMA2
     class modem
     user root
     group radio audio
-
-# TA Loader
-service ta_load /system/bin/ta_loader
-    user root
-    group radio
 
 # AT Distributor for factory test
 service at_distributor /system/bin/at_distributor
