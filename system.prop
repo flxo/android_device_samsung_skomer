@@ -3,7 +3,7 @@
 ###########
 rild.libpath=/system/lib/libsec-ril.so
 rild.libargs=-d /dev/ttyS0
-ro.telephony.ril_class=SamsungU8500RIL
+ro.telephony.ril_class=Smdk4210RIL
 ro.telephony.sends_barcount=1
 ro.ril.hsxpa=1
 ro.ril.gprsclass=10
@@ -16,7 +16,7 @@ ro.telephony.call_ring.multiple=false
 ### USB ###
 ###########
 ro.adb.qemud=1
-persist.sys.usb.config=adb
+persist.sys.usb.config=mtp,adb
 persist.service.adb.enable=1
 
 ############
@@ -40,14 +40,6 @@ debug.sf.hw=1
 # This gives bad performace for deferred renderers
 # such as Mali.
 debug.hwui.render_dirty_regions=false
-
-# This forces the system to fix every graphical issue, may slow down composition speed.
-persist.sys.use_dithering=2
-
-# Stric mode is enabled by default on non-user builds, and forces to make flashes of red lines
-# around the borders of the screen when the UI composition is blocked for too much time. 
-# Disable it until we fix the original issue.
-persist.sys.strictmode.disable=1
 
 ##############
 ### Screen ###
