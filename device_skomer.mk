@@ -78,6 +78,10 @@ PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.usb.default
 
+# Gps
+PRODUCT_COPY_FILES += \
+    device/samsung/skomer/prebuilt/system/etc/sirfgps.conf:system/etc/sirfgps.conf \
+
 # Sensors
 PRODUCT_PACKAGES += \
     lights.montblanc
