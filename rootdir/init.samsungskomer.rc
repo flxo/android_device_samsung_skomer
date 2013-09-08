@@ -1,21 +1,28 @@
 # NOTE: This file contains ST-Ericsson related additions/modifications/deletions to init.rc
 #       Commented out lines are kept for reference.
 
-import /init.${ro.hardware}.usb.rc
-import /init.${ro.hardware}.bt.rc
-
-on early-init
-    export EXTERNAL_STORAGE /storage/sdcard0 
-    mkdir /storage 0550 system sdcard_r
-    mkdir /storage/sdcard0 0000 system system
-    symlink /storage/sdcard0 /sdcard
-    symlink /storage/sdcard0 /mnt/sdcard
-    symlink /storage/sdcard1 /mnt/sdcard1
-    export SECONDARY_STORAGE /storage/sdcard1
-    mkdir /storage/sdcard1 0000 system system
+import /init.samsung-u8500.usb.rc
 
 on init
-    export LD_LIBRARY_PATH /vendor/lib:/system/lib:/system/lib/ste_omxcomponents
+
+    mkdir /mnt/shell/emulated 0700 shell shell
+    mkdir /storage 0550 system sdcard_r
+    mkdir /storage/emulated 0555 root root
+    mkdir /storage/sdcard1 0775 system system
+
+    export EXTERNAL_STORAGE /storage/emulated/legacy
+    export SECONDARY_STORAGE /storage/sdcard1
+    export EMULATED_STORAGE_SOURCE /mnt/shell/emulated
+    export EMULATED_STORAGE_TARGET /storage/emulated
+
+    # For backwards compatibility
+    symlink /storage/emulated/legacy /sdcard
+    symlink /storage/emulated/legacy /mnt/sdcard
+    symlink /storage/emulated/legacy /storage/sdcard0
+    symlink /mnt/shell/emulated/0 /storage/emulated/legacy
+    symlink /storage/sdcard1 /extSdCard
+    symlink /storage/sdcard1 /mnt/extSdCard
+
     export OMX_STE_ENS_COMPONENTS_DIR /system/lib/ste_omxcomponents/
     export OMX_BELLAGIO_LOADER_REGISTRY /system/omxloaders
 
@@ -38,6 +45,9 @@ on init
     # mount debugfs in order for Audio ADM component to retrieve debug information
     mkdir /debug
     mount debugfs none /debug
+
+    # Prevents permission denied error for telephony
+    chmod 0644 /proc/cmdline
 
 on fs
     mount_all /fstab.samsungskomer
@@ -271,7 +281,7 @@ on post-fs
 on post-fs-data
 
     # create basic filesystem structure
-    mkdir /data/media 0770 media_rw media_rw
+    mkdir /data/media 0775 media_rw media_rw
     chown media_rw media_rw /data/media
     mkdir /data/misc/psdata
     mkdir /data/misc/bluetoothd 0770 bluetooth bluetooth
@@ -315,6 +325,9 @@ on early-boot
     write /sys/module/cm/parameters/enable_auto_pm 1
 
 on boot
+
+    # debugfs
+    mount debugfs /sys/kernel/debug /sys/kernel/debug
 
     # Set timeout value for rmnet stats.
     write /sys/devices/virtual/net/rmnet0/timeout_suspend 5000000
@@ -427,48 +440,18 @@ on boot
     class_start modem
     class_start default
 
-service netd /system/bin/netd
-    class main
-    socket netd stream 0660 root system dbus_access
-    socket dnsproxyd stream 0660 root inet
-    socket mdns stream 0660 root system
-
-service media /system/bin/logwrapper /system/bin/mediaserver
-    class main
-    user media
-    group system audio camera inet net_bt net_bt_admin net_bw_acct drmrpc sdcard_rw sdcard_r
-    ioprio rt 4
-
-service dbus /system/bin/logwrapper /system/bin/dbus-daemon --system --nofork
-    class main
-    socket dbus stream 660 bluetooth bluetooth
-    socket dbus_ste stream 660 bluetooth dbus_access
-    user bluetooth
-    group bluetooth net_bt_admin dbus_access
-
-service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -n -d
-    class main
-    socket bluetooth stream 660 bluetooth bluetooth
-    socket dbus_bluetooth stream 660 bluetooth bluetooth
-    # init.rc does not yet support applying capabilities, so run as root and
-    # let bluetoothd drop uid to bluetooth with the right linux capabilities
-    group bluetooth net_bt_admin misc
-    disabled
-
-service sdcard /system/bin/sdcard /data/media 1023 1023
-     class late_start
+# create virtual SD card at /mnt/sdcard, based on the /data/media directory
+# daemon will drop to user/group system/media_rw after initializing
+# underlying files in /data/media wil be created with user and group media_rw (1023)
+service sdcard /system/bin/sdcard /data/media /mnt/shell/emulated 1023 1023
+    class late_start
 
 # Crash Safe Parameter Storage Area, serving production parameter requests from clients.
 # Configuration is read from file "/etc/cspsa.conf" and each found area spawns a CSPSA server
 # process.
-service cspsa /system/bin/logwrapper /system/bin/cspsa-server
+service cspsa /system/bin/cspsa-server
     class parameter_storage
     user root
-    oneshot
-
-# init Phonet net device required for Phonet communication with Modem
-service phonet-netdev /system/bin/ifconfig upnlink0 up
-    class main
     oneshot
 
 # Copy RF trim data from CSPSA, and start the Modem Storage Agent (MSA) service
@@ -492,16 +475,12 @@ service modem_log_relay /system/bin/modem_log_relay --ctrl_port=2001 --data_port
     class modem
     user root
 
-service admsrv /system/bin/logwrapper /system/bin/admsrv
+service admsrv /system/bin/admsrv
     class main
     user root
     group system audio inet net_bt net_bt_admin net_raw shell log
     ioprio rt 4
     capability NET_ADMIN NET_RAW SYS_NICE
-
-service stedump /system/bin/logwrapper /system/bin/stedump
-    class main
-    user root
 
 on property:init.svc.wpa_supplicant=stopped
     stop dhcpcd
@@ -516,10 +495,6 @@ service atd /system/bin/at_core -mode normal -serial ttyAMA2
 service at_distributor /system/bin/at_distributor
     user root
     group radio log
-
-service battery_params /system/xbin/battery_params
-    class main
-    oneshot
 
 # We must to setup two different services for p2p and wpa supplicants on bcm4334
 service wpa_supplicant /system/bin/wpa_supplicant -Dnl80211 -iwlan0 -puse_p2p_group_interface=1 -e/data/misc/wifi/entropy.bin
