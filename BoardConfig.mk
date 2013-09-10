@@ -37,8 +37,6 @@ TARGET_USE_ST_ERICSSON_KERNEL := true
 BOARD_KERNEL_BASE := 0x00000000
 BOARD_RECOVERY_BASE := 0x00000000
 BOARD_KERNEL_PAGESIZE := 2048
-# TODO: check if this is needed
-BOARD_MKBOOTIMG_ARGS := --ramdisk_offset 0x02000000
 
 # Wifi
 WIFI_DRIVER_MODULE_ARG := "firmware_path=/system/etc/wifi/bcmdhd_sta.bin_b2 nvram_path=/system/etc/wifi/nvram_net.txt_GPIO4"
@@ -50,6 +48,4 @@ BOARD_VOLD_MAX_PARTITIONS := 25
 BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
 BOARD_VOLD_DISC_HAS_MULTIPLE_MAJORS := true
 
-# Recovery
-#TARGET_PROVIDES_INIT_RC := true
 TARGET_RECOVERY_INITRC = device/samsung/skomer/recovery/recovery.rc
