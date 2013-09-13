@@ -20,14 +20,14 @@
 
 * Description
 
-  This repository is for CM10 on Samsung X Cover 2 a.k.a Samsung Skomer.
-  It's still a work in progress.
+  This repository is for CM 10.1 on Samsung X Cover 2 a.k.a Samsung Skomer.
+  It's still a work in progress. Use this at your own risk!
 
-* How To Build CM10 for Samsung Skomer
+* How To Build CM 10.1 for Samsung Skomer
 
   - Do repo init & sync
 
-  $ repo init -u git://github.com/CyanogenMod/android.git -b jellybean
+  $ repo init -u git://github.com/CyanogenMod/android.git -b cm-10.1
 
   - Create .repo/local_manifest.xml with the following content:
 
@@ -36,6 +36,7 @@
      <project path="device/samsung/skomer" name="flxo/android_device_samsung_skomer"/>
      <project path="kernel/samsung/skomer" name="flxo/android_kernel_samsung_skomer"/>
      <project path="vendor/samsung/skomer" name="flxo/android_vendor_samsung_skomer"/>
+     <project path="device/samsung/u8500-common" name="flxo/android_device_samsung_u8500-common"/>
   </manifest>
 
   $ repo sync
