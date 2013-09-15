@@ -18,7 +18,9 @@ on init
     mkdir /cache
     mkdir /preload
     mount /tmp /tmp tmpfs
-    #mount /system
+
+    # just try....
+    mount /external_sd
 
     write /sys/devices/platform/mcde_fb/graphics/fb0/bits_per_pixel 16
     write /sys/class/android_usb/android0/enable 0
