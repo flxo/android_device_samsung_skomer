@@ -37,6 +37,7 @@
      <project path="kernel/samsung/skomer" name="flxo/android_kernel_samsung_skomer"/>
      <project path="vendor/samsung/skomer" name="flxo/android_vendor_samsung_skomer"/>
      <project path="device/samsung/u8500-common" name="flxo/android_device_samsung_u8500-common"/>
+     <project path="vendor/samsung/u8500-common" name="flxo/android_vendor_samsung_u8500-common" revision="cm-10.1" />
   </manifest>
 
   $ repo sync

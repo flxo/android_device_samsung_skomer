@@ -22,9 +22,6 @@ DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 # Inherit common configuration for Samsung u8500 devices
 $(call inherit-product-if-exists, device/samsung/u8500-common/device_u8500-common.mk)
 
-# Inherit the proprietary vendors blobs for Samsung Skomer.
-$(call inherit-product-if-exists, vendor/samsung/skomer/skomer-vendor.mk)
-
 # Ramdisk
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/init.samsungskomer.rc:root/init.samsungskomer.rc \
