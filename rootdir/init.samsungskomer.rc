@@ -50,6 +50,13 @@ on init
     # Prevents permission denied error for telephony
     chmod 0644 /proc/cmdline
 
+    setprop service.adb.root 1
+
+on property:service.adb.root=1
+    write /sys/class/android_usb/android0/enable 0
+    restart adbd
+    write /sys/class/android_usb/android0/enable 1
+
 on fs
     mount_all /fstab.samsungskomer
     setprop ro.crypto.fuse_sdcard true
