@@ -42,6 +42,8 @@ WIFI_DRIVER_MODULE_ARG := "firmware_path=/system/etc/wifi/bcmdhd_sta.bin_b2 nvra
 WFI_DRIVER_MODULE_AP_ARG := "firmware_path=/system/etc/wifi/bcmdhd_apsta.bin_b2 nvram_path=/system/etc/wifi/nvram_net.txt_GPIO4"
 WIFI_BAND := 802_11_ABG
 
+BOARD_USE_LPM_BOOT_KERNEL_ARGUMENT := true
+
 # Vold
 BOARD_VOLD_MAX_PARTITIONS := 25
 BOARD_VOLD_EMMC_SHARES_DEV_MAJOR := true
