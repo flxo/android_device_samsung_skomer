@@ -33,11 +33,13 @@
 
   <?xml version="1.0" encoding="UTF-8"?>
   <manifest>
-     <project path="device/samsung/skomer" name="flxo/android_device_samsung_skomer"/>
-     <project path="kernel/samsung/skomer" name="flxo/android_kernel_samsung_skomer"/>
-     <project path="vendor/samsung/skomer" name="flxo/android_vendor_samsung_skomer"/>
-     <project path="device/samsung/u8500-common" name="flxo/android_device_samsung_u8500-common"/>
-     <project path="vendor/samsung/u8500-common" name="flxo/android_vendor_samsung_u8500-common" revision="cm-10.1" />
+     <project path="device/samsung/skomer" name="flxo/android_device_samsung_skomer" />
+     <project path="kernel/samsung/skomer" name="flxo/android_kernel_samsung_skomer" revision="jellybean" />
+     <project path="device/samsung/u8500-common" name="flxo/android_device_samsung_u8500-common" />
+     <project path="vendor/samsung/u8500-common" name="flxo/android_vendor_samsung_u8500-common" />
+     <project path="hardware/u8500" name="TeamCanjica/android_hardware_u8500" />
+     <remove-project name="CyanogenMod/android_hardware_libhardware" />
+     <project path="hardware/libhardware" name="TeamCanjica/android_hardware_libhardware" />
   </manifest>
 
   $ repo sync
@@ -45,6 +47,10 @@
   - Setup vendor
 
   $ ./vendor/cm/get-prebuilts
+
+  - Pull all OMX fixes from gerrit:
+
+  $ ./device/samsung/skomer/pull
 
   - Setup environment
 
