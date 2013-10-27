@@ -434,6 +434,7 @@ on boot
     chown system system /sys/class/camera/front/front_camtype
     chown system system /sys/class/camera/rear/rear_camtype
     chown system system /sys/class/camera/flash/rear_flash
+    chmod 222 /sys/class/sec/flash/enable
 
     # camera debug
     setprop persist.debug.extcamera.level 777
