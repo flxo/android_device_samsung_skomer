@@ -1,7 +1,7 @@
 # NOTE: This file contains ST-Ericsson related additions/modifications/deletions to init.rc
 #       Commented out lines are kept for reference.
 
-import /init.samsung-u8500.usb.rc
+import /init.samsungskomer.usb.rc
 
 on init
 
@@ -22,8 +22,8 @@ on init
     symlink /mnt/shell/emulated/0 /storage/emulated/legacy
     symlink /storage/sdcard1 /extSdCard
     symlink /storage/sdcard1 /mnt/extSdCard
-    symlink /storage/sdcard1 /storage/extSdCard
 
+    export LD_LIBRARY_PATH /system/lib:/lib:/usr/lib:/system/lib/ste_omxcomponents:/vendor/lib
     export OMX_STE_ENS_COMPONENTS_DIR /system/lib/ste_omxcomponents/
     export OMX_BELLAGIO_LOADER_REGISTRY /system/omxloaders
 
@@ -49,11 +49,6 @@ on init
 
     # Prevents permission denied error for telephony
     chmod 0644 /proc/cmdline
-
-on property:service.adb.root=1
-    write /sys/class/android_usb/android0/enable 0
-    restart adbd
-    write /sys/class/android_usb/android0/enable 1
 
 on fs
     mount_all /fstab.samsungskomer
@@ -272,13 +267,13 @@ on post-fs
     chmod 0660 /debug/prcmu/ddr_opp
 
     # Install Kernel Module
-    insmod /lib/modules/j4fs.ko
+    insmod /system/lib/modules/j4fs.ko
 
     # We need to decide j4fs's partition number(mmcblk0pX)
     mount j4fs /dev/block/mmcblk0p19 /mnt/.lfs wait
     symlink /dev/block/mmcblk0p19 /dev/block/param
 
-    insmod /lib/modules/param.ko
+    insmod /system/lib/modules/param.ko
     insmod /system/lib/modules/bthid.ko
 
     # AB8500 Fuelgauge initialization using PARAM capacity
@@ -318,12 +313,7 @@ on post-fs-data
     # Set indication (checked by vold) that we have finished this action
     setprop vold.post_fs_data_done 1
 
-    export LD_LIBRARY_PATH /system/lib:/lib:/usr/lib:/system/lib/ste_omxcomponents/:/vendor/lib
-
 on early-boot
-
-    # Launch core services in case charging mode is entered
-    start watchdog-kicker
 
     # Prepare modem
     class_start modem-u8500
@@ -434,7 +424,6 @@ on boot
     chown system system /sys/class/camera/front/front_camtype
     chown system system /sys/class/camera/rear/rear_camtype
     chown system system /sys/class/camera/flash/rear_flash
-    chmod 222 /sys/class/sec/flash/enable
 
     # camera debug
     setprop persist.debug.extcamera.level 777
@@ -529,7 +518,7 @@ service dhcpcd_p2p /system/bin/dhcpcd -aABKL
 	disabled
 	oneshot
 
-service dhcpcd_bnep0 /system/bin/dhcpcd -ABKL
+service dhcpcd_bt-pan /system/bin/dhcpcd -ABKL
 	class main
 	disabled
 	oneshot
@@ -544,7 +533,7 @@ service iprenew_p2p /system/bin/dhcpcd -n
 	disabled
 	oneshot
 
-service iprenew_bnep0 /system/bin/dhcpcd -n
+service iprenew_bt-pan /system/bin/dhcpcd -n
 	class main
 	disabled
 	oneshot

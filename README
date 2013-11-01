@@ -1,7 +1,7 @@
 #
 # Copyright (C) 2013 The Android Open Source Project
 # Copyright (C) 2013 Óliver García Albertos (oliverarafo@gmail.com)
-# Copyright (C) 2013 Felix Obenhuber (f.obenhuber@gmail.com)
+# Copyright (C) 2013 Felix Obenuber (f.obenhuber@gmail.com)
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,37 +20,43 @@
 
 * Description
 
-  This repository is for CM 10.1 on Samsung X Cover 2 a.k.a Samsung Skomer.
-  It's still a work in progress. Use this at your own risk!
+  This repository is for CM10.2 on Samsung X Cover 2 Mini a.k.a Samsung Skomer.
+  It's still a work in progress.
 
-* How To Build CM 10.1 for Samsung Skomer
+* How To Build CM10.2 for Samsung skomer
+
+  - Make a workspace
+
+  $ mkdir -p ~/cyanogenmod/system
+  $ cd ~/cyanogenmod/system
+
 
   - Do repo init & sync
 
-  $ repo init -u git://github.com/CyanogenMod/android.git -b cm-10.1
+  $ repo init -u git://github.com/CyanogenMod/android.git -b cm-10.2
 
-  - Create .repo/local_manifest.xml with the following content:
+
+  - Create .repo/local_manifests/skomer.xml with the following content:
 
   <?xml version="1.0" encoding="UTF-8"?>
   <manifest>
-     <project path="device/samsung/skomer" name="flxo/android_device_samsung_skomer" />
-     <project path="kernel/samsung/skomer" name="flxo/android_kernel_samsung_skomer" revision="jellybean" />
-     <project path="device/samsung/u8500-common" name="flxo/android_device_samsung_u8500-common" />
-     <project path="vendor/samsung/u8500-common" name="flxo/android_vendor_samsung_u8500-common" />
-     <project path="hardware/u8500" name="TeamCanjica/android_hardware_u8500" />
-     <remove-project name="CyanogenMod/android_hardware_libhardware" />
-     <project path="hardware/libhardware" name="TeamCanjica/android_hardware_libhardware" />
+      <project name="flxo/android_device_samsung_skomer" path="device/samsung/skomer" />
+      <project name="flxo/android_kernel_samsung_skomer" path="kernel/samsung/skomer" />
+      <project name="flxo/android_vendor_samsung_skomer" path="vendor/samsung/skomer" />
+      <project name="TeamCanjica/android_hardware_u8500" path="hardware/u8500" />
   </manifest>
 
   $ repo sync
+
 
   - Setup vendor
 
   $ ./vendor/cm/get-prebuilts
 
-  - Pull all OMX fixes from gerrit:
 
+  - Pull all not merged fixes from gerrit:
   $ ./device/samsung/skomer/pull
+
 
   - Setup environment
 
@@ -58,19 +64,21 @@
   $ lunch cm_skomer-eng
 
 
-  - Build
+  - Build CM10.2
 
   $ export USE_CCACHE=1
-  $ make -jX otapackage
+  $ make -j4 bacon
 
 
 * Thanks
 
+  Oliver!
   CyanogenMod
   alquez
   modpunk
   dudeman1996
   benjamingwwyn
   lupohirp
-  OliverG96
-  TheBoegl
+  marcin
+  diego-ch
+  maclaw

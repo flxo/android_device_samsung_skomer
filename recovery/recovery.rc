@@ -17,26 +17,7 @@ on init
     mkdir /data
     mkdir /cache
     mkdir /preload
-    mount /tmp /tmp tmpfs
-
-    # just try....
-    mount /external_sd
-
-    write /sys/devices/platform/mcde_fb/graphics/fb0/bits_per_pixel 16
-    write /sys/class/android_usb/android0/enable 0
-    write /sys/class/android_usb/android0/idVendor 04E8
-    write /sys/class/android_usb/android0/idProduct 685D
-    write /sys/class/android_usb/android0/bDeviceClass 0
-    write /sys/class/android_usb/android0/iManufacturer $ro.product.manufacturer
-    write /sys/class/android_usb/android0/iProduct $ro.product.model
-    write /sys/class/android_usb/android0/iSerial $ro.serialno
-    write /sys/class/android_usb/android0/functions adb
-    write /sys/class/android_usb/android0/enable 1
-    write /sys/devices/platform/ab8500-i2c.0/ab8500-usb.0/boot_time_device 1
-    write /sys/devices/platform/ab8505-i2c.0/ab8500-usb.0/boot_time_device 1    
-
-    setprop service.adb.root 1
-    start adbd
+    mount /tmp /tmp tmpfs 
 
 on early-fs
 
@@ -50,12 +31,12 @@ on early-fs
     mkdir /mnt 0775 root root
     mkdir /mnt/.lfs 0755 root root
 
-    insmod /lib/modules/j4fs.ko
+    insmod /system/lib/modules/j4fs.ko
     # We need to decide j4fs's partition number(mmcblk0pX)
     # loke4
     mount j4fs /dev/block/mmcblk0p19 /mnt/.lfs wait
 
-    insmod /lib/modules/param.ko
+    insmod /system/lib/modules/param.ko
 
 on boot
 
@@ -80,7 +61,23 @@ on property:ro.debuggable=1
 service recovery /sbin/recovery
 
 service adbd /sbin/adbd recovery
+    disabled
 
+# Always start adbd on userdebug and eng builds
+# In recovery, always run adbd as root.
+on property:ro.debuggable=1
+    write /sys/class/android_usb/android0/enable 0
+    write /sys/class/android_usb/android0/idVendor 04E8
+    write /sys/class/android_usb/android0/idProduct 685D
+    write /sys/class/android_usb/android0/functions adb
+    write /sys/class/android_usb/android0/enable 1
+    write /sys/class/android_usb/android0/iManufacturer $ro.product.manufacturer
+    write /sys/class/android_usb/android0/iProduct $ro.product.model
+    write /sys/class/android_usb/android0/iSerial $ro.serialno
+    start adbd
+    setprop service.adb.root 1
+
+# Restart adbd so it can run as root
 on property:service.adb.root=1
     write /sys/class/android_usb/android0/enable 0
     restart adbd

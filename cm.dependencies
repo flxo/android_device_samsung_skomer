@@ -4,18 +4,10 @@
     "target_path": "device/samsung/skomer"
   },
   {
-    "repository": "android_device_samsung_skomer-common",
-    "target_path": "device/samsung/skomer-common"
-  },
-  {
-    "repository": "android_device_samsung_u8500-common",
-    "target_path": "device/samsung/u8500-common"
-  },
-  {
     "repository": "android_kernel_samsung_skomer",
     "target_path": "kernel/samsung/skomer"
- },
- {
+  },
+  {
    "repository": "android_vendor_samsung_skomer",
    "target_path": "vendor/samsung/skomer"
   }
