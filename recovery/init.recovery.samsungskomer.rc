@@ -1,0 +1,11 @@
+on early-fs
+    mkdir /mnt 0775 root root
+    mkdir /mnt/.lfs 0755 root root
+    mkdir /efs
+
+    mount ext4 /dev/block/mmcblk0p11 /efs nosuid nodev noatime wait
+
+    insmod /lib/modules/j4fs.ko
+    mount j4fs /dev/block/mmcblk0p19 /mnt/.lfs wait
+
+    insmod /lib/modules/param.ko

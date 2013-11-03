@@ -35,6 +35,12 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/rootdir/fstab.samsungskomer:root/fstab.samsungskomer \
     $(LOCAL_PATH)/rootdir/lpm.rc:root/lpm.rc
 
+# Recovery
+PRODUCT_COPY_FILES += \
+    $(LOCAL_PATH)/recovery/init.recovery.samsungskomer.rc:root/init.recovery.samsungskomer.rc \
+    $(LOCAL_PATH)/recovery/lib/modules/j4fs.ko:recovery/root/lib/modules/j4fs.ko \
+    $(LOCAL_PATH)/recovery/lib/modules/param.ko:recovery/root/lib/modules/param.ko
+
 # Inputs
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/usr/keylayout/gpio-keys.kl:system/usr/keylayout/gpio-keys.kl
