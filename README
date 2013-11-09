@@ -43,7 +43,6 @@
       <project name="flxo/android_device_samsung_skomer" path="device/samsung/skomer" />
       <project name="flxo/android_kernel_samsung_skomer" path="kernel/samsung/skomer" />
       <project name="flxo/android_vendor_samsung_skomer" path="vendor/samsung/skomer" />
-      <project name="TeamCanjica/android_hardware_u8500" path="hardware/u8500" />
   </manifest>
 
   $ repo sync
