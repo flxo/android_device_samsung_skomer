@@ -1,3 +1,6 @@
+on init
+    write /sys/devices/platform/ab8505-i2c.0/ab8500-usb.0/boot_time_device 1
+
 on early-fs
     mkdir /mnt 0775 root root
     mkdir /mnt/.lfs 0755 root root
