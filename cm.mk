@@ -31,4 +31,4 @@ PRODUCT_MANUFACTURER := samsung
 
 # Set build fingerprint and ID
 BUILD_ID := TRIANA00$(shell date -u +%Y%m%d)
-PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cm_skomer BUILD_FINGERPRINT=cyanogenmod/cm_skomer/skomer:4.3.1/$(BUILD_ID) PRIVATE_BUILD_DESC="GT-S7710 4.3.1"
+PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=cm_skomer BUILD_FINGERPRINT=cyanogenmod/cm_skomer/skomer:4.4/$(BUILD_ID) PRIVATE_BUILD_DESC="GT-S7710 4.4"
