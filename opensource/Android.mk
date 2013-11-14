@@ -17,6 +17,6 @@
 
 LOCAL_PATH := $(call my-dir)
 
-ifeq ($(TARGET_DEVICE),golden)
+ifeq ($(TARGET_DEVICE),skomer)
     include $(call all-subdir-makefiles)
 endif
