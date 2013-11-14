@@ -58,7 +58,6 @@ BOARD_KERNEL_PAGESIZE := 2048
 # Graphics
 USE_OPENGL_RENDERER := true
 BOARD_EGL_CFG := device/samsung/skomer/configs/lib/egl/egl.cfg
-BOARD_EGL_CFG := device/samsung/golden/configs/lib/egl/egl.cfg
 COMMON_GLOBAL_CFLAGS += -DEGL_NEEDS_FNW -DFORCE_SCREENSHOT_CPU_PATH
 
 # Screen
@@ -109,7 +108,7 @@ BOARD_LPM_BOOT_ARGUMENT_VALUE := 1
 
 # Selinux
 BOARD_SEPOLICY_DIRS += \
-    device/samsung/golden/selinux
+    device/samsung/skomer/selinux
 
 BOARD_SEPOLICY_UNION += \
     camera.te \
