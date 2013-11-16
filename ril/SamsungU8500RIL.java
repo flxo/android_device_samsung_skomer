@@ -55,6 +55,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
+import android.media.AudioManager;
 import android.net.ConnectivityManager;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
@@ -160,6 +161,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
 
     static final int RIL_UNSOL_SIM_SMS_STORAGE_AVAILALE = 11015;
     static final int RIL_UNSOL_HSDPA_STATE_CHANGED = 11016;
+    static final int RIL_UNSOL_WB_AMR_STATE = 11017;
     static final int RIL_UNSOL_TWO_MIC_STATE = 11018;
     static final int RIL_UNSOL_DHA_STATE = 11019;
     static final int RIL_UNSOL_UART = 11020;
@@ -178,11 +180,13 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
 
     protected HandlerThread mSamsungu8500RILThread;
     protected ConnectivityHandler mSamsungu8500RILHandler;
+    private AudioManager audioManager;
     private boolean mSignalbarCount = SystemProperties.getInt("ro.telephony.sends_barcount", 0) == 1 ? true : false;
     private boolean mIsSamsungCdma = SystemProperties.getBoolean("ro.ril.samsung_cdma", false);
 
     public SamsungU8500RIL(Context context, int networkMode, int cdmaSubscription) {
         super(context, networkMode, cdmaSubscription);
+        audioManager = (AudioManager)mContext.getSystemService(Context.AUDIO_SERVICE);
         mQANElements = 5;
     }
 
@@ -348,17 +352,14 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
     protected RILRequest findAndRemoveRequestFromList(int serial) {
         long removalTime = System.currentTimeMillis();
         long timeDiff = 0;
+        RILRequest rr = null;
 
         synchronized (mRequestList) {
-          Iterator<RILRequest> itr = mRequestList.iterator();
 
-            while ( itr.hasNext() ) {
-                RILRequest rr = itr.next();
+		rr = mRequestList.get(serial);
 
-                if (rr.mSerial == serial) {
-                    itr.remove();
-                    if (mRequestMessagesWaiting > 0)
-                        mRequestMessagesWaiting--;
+                if (rr != null) {
+					mRequestList.remove(serial);
                     return rr;
                 }
                 else
@@ -392,12 +393,11 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
                     }
                 }
             }
-        }
         return null;
     }
 
     @Override
-    protected void processSolicited (Parcel p) {
+    protected RILRequest processSolicited (Parcel p) {
     int serial, error;
     boolean found = false;
 
@@ -411,7 +411,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
     if (rr == null) {
         Rlog.w(RILJ_LOG_TAG, "Unexpected solicited response! sn: "
                         + serial + " error: " + error);
-            return;
+            return null;
     }
 
     Object ret = null;
@@ -427,7 +427,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
             case RIL_REQUEST_ENTER_SIM_PUK2: ret =  responseInts(p); break;
             case RIL_REQUEST_CHANGE_SIM_PIN: ret =  responseInts(p); break;
             case RIL_REQUEST_CHANGE_SIM_PIN2: ret =  responseInts(p); break;
-            case RIL_REQUEST_ENTER_DEPERSONALIZATION_CODE: ret =  responseInts(p); break;
+            case RIL_REQUEST_ENTER_NETWORK_DEPERSONALIZATION: ret =  responseInts(p); break;
             case RIL_REQUEST_GET_CURRENT_CALLS: ret =  responseCallList(p); break;
             case RIL_REQUEST_DIAL: ret =  responseVoid(p); break;
             case RIL_REQUEST_GET_IMSI: ret =  responseString(p); break;
@@ -543,8 +543,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
                     AsyncResult.forMessage(rr.mResult, null, tr);
                     rr.mResult.sendToTarget();
                 }
-                rr.release();
-                return;
+                return rr;
             }
         }
 
@@ -553,8 +552,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
             if(!(error == -1 && rr.mRequest == RIL_REQUEST_SEND_SMS))
             {
                 rr.onError(error, ret);
-                rr.release();
-                return;
+                return rr;
             } else {
                 try
                 {
@@ -564,8 +562,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
                             + requestToString(rr.mRequest)
                             + " exception, Processing Samsung SMS fix ", tr);
                     rr.onError(error, ret);
-                    rr.release();
-                    return;
+                    return rr;
                 }
             }
         }
@@ -578,8 +575,8 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
             rr.mResult.sendToTarget();
         }
 
-        rr.release();
-    }
+	return rr;
+   }
 
     @Override
     public void
@@ -642,6 +639,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
             case RIL_UNSOL_DATA_SUSPEND_RESUME: ret = responseInts(p); break;
             case RIL_UNSOL_STK_CALL_CONTROL_RESULT: ret = responseVoid(p); break;
             case RIL_UNSOL_TWO_MIC_STATE: ret = responseInts(p); break;
+            case RIL_UNSOL_WB_AMR_STATE: ret = responseInts(p); break;
 
             default:
                 // Rewind the Parcel
@@ -724,6 +722,10 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
             case RIL_UNSOL_TWO_MIC_STATE:
                 if (RILJ_LOGD) samsungUnsljLogRet(response, ret);
                 break;
+            case RIL_UNSOL_WB_AMR_STATE:
+                if (RILJ_LOGD) samsungUnsljLogRet(response, ret);
+                setWbAmr(((int[])ret)[0]);
+                break;
         }
     }
 
@@ -737,6 +739,7 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
             case RIL_UNSOL_DATA_SUSPEND_RESUME: return "RIL_UNSOL_DATA_SUSPEND_RESUME";
             case RIL_UNSOL_STK_CALL_CONTROL_RESULT: return "RIL_UNSOL_STK_CALL_CONTROL_RESULT";
             case RIL_UNSOL_TWO_MIC_STATE: return "RIL_UNSOL_TWO_MIC_STATE";
+            case RIL_UNSOL_WB_AMR_STATE: return "RIL_UNSOL_WB_AMR_STATE";
             default: return "<unknown response: "+request+">";
         }
     }
@@ -755,6 +758,21 @@ public class SamsungU8500RIL extends RIL implements CommandsInterface {
 
     protected void samsungUnsljLogvRet(int response, Object ret) {
         riljLogv("[UNSL]< " + samsungResponseToString(response) + " " + retToString(response, ret));
+    }
+
+    /**
+     * Set audio parameter "wb_amr" for HD-Voice (Wideband AMR).
+     *
+     * @param state: 0 = unsupported, 1 = supported.
+     */
+    private void setWbAmr(int state) {
+        if (state == 1) {
+            Rlog.d(RILJ_LOG_TAG, "setWbAmr(): setting audio parameter - wb_amr=on");
+            audioManager.setParameters("wb_amr=on");
+        } else {
+            Rlog.d(RILJ_LOG_TAG, "setWbAmr(): setting audio parameter - wb_amr=off");
+            audioManager.setParameters("wb_amr=off");
+        }
     }
 
     @Override
