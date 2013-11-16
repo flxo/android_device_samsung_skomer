@@ -1,2 +1,5 @@
 rild.libpath=/system/lib/libsec-ril.so
 rild.libargs=-d /dev/ttyS0
+ro.secure=0
+ro.debuggable=1
+persist.service.adb.enable=1
