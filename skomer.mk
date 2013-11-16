@@ -25,7 +25,8 @@ $(call inherit-product, build/target/product/languages_full.mk)
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 
 # Inherit the proprietary vendors blobs for Samsung Skomer
-$(call inherit-product-if-exists, vendor/samsung/skomer/skomer-vendor.mk)
+$(call inherit-product, vendor/samsung/skomer/skomer-vendor.mk)
+
 
 # Ramdisk
 PRODUCT_COPY_FILES += \
@@ -107,7 +108,8 @@ PRODUCT_PROPERTY_OVERRIDES += \
     ro.telephony.call_ring.multiple=false \
     ro.telephony.ril_class=SamsungU8500RIL \
     ro.telephony.sends_barcount=1 \
-    ro.telephony.default_network=0
+    ro.ril.gprsclass=10 \
+    ro.ril.hsxpa=1
 
 # GPS
 PRODUCT_COPY_FILES += \
@@ -121,7 +123,9 @@ PRODUCT_COPY_FILES += \
 PRODUCT_PACKAGES += \
     audio.a2dp.default \
     audio.usb.default \
-    libasound
+    libasound \
+    libaudioutils \
+    libtinyalsa
 
 # Sensors
 PRODUCT_PACKAGES += \
@@ -171,6 +175,7 @@ PRODUCT_PACKAGES += \
 # Misc packages
 PRODUCT_PACKAGES += \
     Torch \
+	SamsungServiceMode \
     com.android.future.usb.accessory
 
 # Non-device-specific props
