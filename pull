@@ -1,18 +1,5 @@
 #!/bin/bash
 
-# Sync all the remote committed changes
-
 cd frameworks/av;
-# include: Add support for STE multimedia - Part 1
-git fetch http://review.cyanogenmod.org/CyanogenMod/android_frameworks_av refs/changes/32/52032/3 && git cherry-pick FETCH_HEAD;
-cd ..;
-cd native;
-# include: Add support for STE multimedia - Part 2
-git fetch http://review.cyanogenmod.org/CyanogenMod/android_frameworks_native refs/changes/33/52033/4 && git cherry-pick FETCH_HEAD;
-cd ..; cd ..;
-cd system/core;
-# init: Allow load of lpm.rc by parsing a cmdline argument
-git fetch http://review.cyanogenmod.org/CyanogenMod/android_system_core refs/changes/18/51718/1 && git cherry-pick FETCH_HEAD;
-# include: Add support for STE multimedia - Part 3
-git fetch http://review.cyanogenmod.org/CyanogenMod/android_system_core refs/changes/34/52034/2 && git cherry-pick FETCH_HEAD;
-cd ..;cd ..;
+git fetch http://review.cyanogenmod.org/CyanogenMod/android_frameworks_av refs/changes/24/53324/2 && git checkout FETCH_HEAD
+cd ../..;
