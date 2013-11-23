@@ -1,0 +1,781 @@
+From cb8bf8168d45deaf0f537e59e701543b3ee97bb1 Mon Sep 17 00:00:00 2001
+From: OliverG96 <oliverarafo@gmail.com>
+Date: Sun, 20 Oct 2013 12:01:57 +0100
+Subject: [PATCH] native: Add support for STE multimedia - Part 2
+
+Enourmous thanks to tecul for doing the perfect port and making everything clean and bugless.
+
+Change-Id: Id14f2289fb0dc28e370d56530e5ae7bc86923a25
+
+Conflicts:
+	include/gui/GLConsumer.h
+	include/ui/GraphicBuffer.h
+	include/ui/PixelFormat.h
+	libs/gui/GLConsumer.cpp
+---
+ include/binder/MemoryBase.h                |   3 +
+ include/binder/Timers.h                    | 145 +++++++++++++++++++++++++++++
+ include/gui/GLConsumer.h                   |  34 +++++++
+ include/media/openmax/OMX_IVCommon.h       |   3 +
+ include/ui/GraphicBuffer.h                 |   7 +-
+ include/ui/PixelFormat.h                   |  12 ++-
+ include/ui/Region.h                        |  25 +++++
+ libs/binder/Android.mk                     |   1 +
+ libs/binder/MemoryBase.cpp                 |  20 +++-
+ libs/binder/Timers.cpp                     | 132 ++++++++++++++++++++++++++
+ libs/gui/Android.mk                        |   3 +-
+ libs/gui/GLConsumer.cpp                    | 124 ++++++++++++++++++++++++
+ libs/ui/PixelFormat.cpp                    |   4 +
+ services/surfaceflinger/SurfaceFlinger.cpp |   3 +
+ 14 files changed, 511 insertions(+), 5 deletions(-)
+ create mode 100644 include/binder/Timers.h
+ create mode 100644 libs/binder/Timers.cpp
+
+diff --git a/include/binder/MemoryBase.h b/include/binder/MemoryBase.h
+index 463e26d..20ec1d4 100644
+--- a/include/binder/MemoryBase.h
++++ b/include/binder/MemoryBase.h
+@@ -33,6 +33,9 @@ public:
+     MemoryBase(const sp<IMemoryHeap>& heap, ssize_t offset, size_t size);
+     virtual ~MemoryBase();
+     virtual sp<IMemoryHeap> getMemory(ssize_t* offset, size_t* size) const;
++#ifdef STE_HARDWARE
++    virtual sp<IMemoryHeap> getMemory(long* offset, unsigned int* size) const;
++#endif
+ 
+ protected:
+     size_t getSize() const { return mSize; }
+diff --git a/include/binder/Timers.h b/include/binder/Timers.h
+new file mode 100644
+index 0000000..92f66c9
+--- /dev/null
++++ b/include/binder/Timers.h
+@@ -0,0 +1,145 @@
++/*
++ * Copyright (C) 2005 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++//
++// Timer functions.
++//
++#ifndef _LIBS_UTILS_TIMERS_H
++#define _LIBS_UTILS_TIMERS_H
++
++#include <stdint.h>
++#include <sys/types.h>
++#include <sys/time.h>
++
++// ------------------------------------------------------------------
++// C API
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++typedef int64_t nsecs_t;       // nano-seconds
++
++static inline nsecs_t seconds_to_nanoseconds(nsecs_t secs)
++{
++    return secs*1000000000;
++}
++
++static inline nsecs_t milliseconds_to_nanoseconds(nsecs_t secs)
++{
++    return secs*1000000;
++}
++
++static inline nsecs_t microseconds_to_nanoseconds(nsecs_t secs)
++{
++    return secs*1000;
++}
++
++static inline nsecs_t nanoseconds_to_seconds(nsecs_t secs)
++{
++    return secs/1000000000;
++}
++
++static inline nsecs_t nanoseconds_to_milliseconds(nsecs_t secs)
++{
++    return secs/1000000;
++}
++
++static inline nsecs_t nanoseconds_to_microseconds(nsecs_t secs)
++{
++    return secs/1000;
++}
++
++static inline nsecs_t s2ns(nsecs_t v)  {return seconds_to_nanoseconds(v);}
++static inline nsecs_t ms2ns(nsecs_t v) {return milliseconds_to_nanoseconds(v);}
++static inline nsecs_t us2ns(nsecs_t v) {return microseconds_to_nanoseconds(v);}
++static inline nsecs_t ns2s(nsecs_t v)  {return nanoseconds_to_seconds(v);}
++static inline nsecs_t ns2ms(nsecs_t v) {return nanoseconds_to_milliseconds(v);}
++static inline nsecs_t ns2us(nsecs_t v) {return nanoseconds_to_microseconds(v);}
++
++static inline nsecs_t seconds(nsecs_t v)      { return s2ns(v); }
++static inline nsecs_t milliseconds(nsecs_t v) { return ms2ns(v); }
++static inline nsecs_t microseconds(nsecs_t v) { return us2ns(v); }
++
++enum {
++    SYSTEM_TIME_REALTIME = 0,  // system-wide realtime clock
++    SYSTEM_TIME_MONOTONIC = 1, // monotonic time since unspecified starting point
++    SYSTEM_TIME_PROCESS = 2,   // high-resolution per-process clock
++    SYSTEM_TIME_THREAD = 3,    // high-resolution per-thread clock
++    SYSTEM_TIME_BOOTTIME = 4   // same as SYSTEM_TIME_MONOTONIC, but including CPU suspend time
++};
++
++// return the system-time according to the specified clock
++#ifdef __cplusplus
++nsecs_t systemTime(int clock = SYSTEM_TIME_MONOTONIC);
++#else
++nsecs_t systemTime(int clock);
++#endif // def __cplusplus
++
++/**
++ * Returns the number of milliseconds to wait between the reference time and the timeout time.
++ * If the timeout is in the past relative to the reference time, returns 0.
++ * If the timeout is more than INT_MAX milliseconds in the future relative to the reference time,
++ * such as when timeoutTime == LLONG_MAX, returns -1 to indicate an infinite timeout delay.
++ * Otherwise, returns the difference between the reference time and timeout time
++ * rounded up to the next millisecond.
++ */
++int toMillisecondTimeoutDelay(nsecs_t referenceTime, nsecs_t timeoutTime);
++
++#ifdef __cplusplus
++} // extern "C"
++#endif
++
++// ------------------------------------------------------------------
++// C++ API
++
++#ifdef __cplusplus
++
++namespace android {
++/*
++ * Time the duration of something.
++ *
++ * Includes some timeval manipulation functions.
++ */
++class DurationTimer {
++public:
++    DurationTimer() {}
++    ~DurationTimer() {}
++
++    // Start the timer.
++    void start();
++    // Stop the timer.
++    void stop();
++    // Get the duration in microseconds.
++    long long durationUsecs() const;
++
++    // Subtract two timevals.  Returns the difference (ptv1-ptv2) in
++    // microseconds.
++    static long long subtractTimevals(const struct timeval* ptv1,
++        const struct timeval* ptv2);
++
++    // Add the specified amount of time to the timeval.
++    static void addToTimeval(struct timeval* ptv, long usec);
++
++private:
++    struct timeval  mStartWhen;
++    struct timeval  mStopWhen;
++};
++
++}; // android
++#endif // def __cplusplus
++
++#endif // _LIBS_UTILS_TIMERS_H
+diff --git a/include/gui/GLConsumer.h b/include/gui/GLConsumer.h
+index a5fdfb9..ed8d7c7 100644
+--- a/include/gui/GLConsumer.h
++++ b/include/gui/GLConsumer.h
+@@ -30,6 +30,15 @@
+ #include <utils/Vector.h>
+ #include <utils/threads.h>
+ 
++#ifdef STE_HARDWARE
++#include <hardware/copybit.h>
++#include <gui/IGraphicBufferAlloc.h>
++#endif
++
++#define ANDROID_GRAPHICS_SURFACETEXTURE_JNI_ID "mSurfaceTexture"
++#define ANDROID_GRAPHICS_FRAMEAVAILABLELISTENER_JNI_ID \
++                                         "mFrameAvailableListener"
++
+ namespace android {
+ // ----------------------------------------------------------------------------
+ 
+@@ -55,6 +64,9 @@ class GLConsumer : public ConsumerBase {
+ protected:
+     enum { TEXTURE_EXTERNAL = 0x8D65 }; // GL_TEXTURE_EXTERNAL_OES
+ public:
++#ifdef STE_HARDWARE
++    enum { NUM_BLIT_BUFFER_SLOTS = 2 };
++#endif
+     typedef ConsumerBase::FrameAvailableListener FrameAvailableListener;
+ 
+     // GLConsumer constructs a new GLConsumer object. tex indicates the
+@@ -275,6 +287,14 @@ private:
+     EGLImageKHR createImage(EGLDisplay dpy,
+             const sp<GraphicBuffer>& graphicBuffer, const Rect& crop);
+ 
++#ifdef STE_HARDWARE
++    // returns TRUE if buffer needs color format conversion
++    bool conversionIsNeeded(const sp<GraphicBuffer>& graphicBuffer);
++
++    // converts buffer to a suitable color format
++    status_t convert(sp<GraphicBuffer> &srcBuf, sp<GraphicBuffer> &dstBuf);
++#endif
++
+     // freeBufferLocked frees up the given buffer slot.  If the slot has been
+     // initialized this will release the reference to the GraphicBuffer in that
+     // slot and destroy the EGLImage in that slot.  Otherwise it has no effect.
+@@ -403,6 +423,20 @@ private:
+     // attachToContext is called.
+     EGLDisplay mEglDisplay;
+ 
++#ifdef STE_HARDWARE
++    // mBlitEngine is the handle to the copybit device which will be used in
++    // case color transform is needed before the EGL image is created.
++    copybit_device_t* mBlitEngine;
++
++    // mGraphicBufferAlloc is the connection to SurfaceFlinger that is used to
++    // allocate new GraphicBuffer objects.
++    sp<IGraphicBufferAlloc> mGraphicBufferAlloc;
++
++
++    sp<GraphicBuffer> mBlitSlots[NUM_BLIT_BUFFER_SLOTS];
++    int mNextBlitSlot;
++#endif
++
+     // mEglContext is the OpenGL ES context with which this GLConsumer is
+     // currently associated.  It is initialized to EGL_NO_CONTEXT and gets set
+     // to the current GL context when updateTexImage is called for the first
+diff --git a/include/media/openmax/OMX_IVCommon.h b/include/media/openmax/OMX_IVCommon.h
+index 96a4396..d052744 100644
+--- a/include/media/openmax/OMX_IVCommon.h
++++ b/include/media/openmax/OMX_IVCommon.h
+@@ -158,6 +158,9 @@ typedef enum OMX_COLOR_FORMATTYPE {
+      * */
+     OMX_COLOR_FormatAndroidOpaque = 0x7F000789,
+     OMX_TI_COLOR_FormatYUV420PackedSemiPlanar = 0x7F000100,
++#ifdef STE_HARDWARE
++    OMX_STE_COLOR_FormatYUV420PackedSemiPlanarMB = 0x7FA00000,
++#endif
+     OMX_QCOM_COLOR_FormatYVU420SemiPlanar = 0x7FA30C00,
+     OMX_QCOM_COLOR_FormatYUV420PackedSemiPlanar64x32Tile2m8ka = 0x7FA30C03,
+     OMX_SEC_COLOR_FormatNV12Tiled = 0x7FC00002,
+diff --git a/include/ui/GraphicBuffer.h b/include/ui/GraphicBuffer.h
+index 7f8cde6..bca366f 100644
+--- a/include/ui/GraphicBuffer.h
++++ b/include/ui/GraphicBuffer.h
+@@ -38,7 +38,12 @@ class GraphicBufferMapper;
+ // ===========================================================================
+ 
+ class GraphicBuffer
+-    : public ANativeObjectBase< ANativeWindowBuffer, GraphicBuffer, RefBase >,
++    : public ANativeObjectBase< ANativeWindowBuffer, GraphicBuffer,
++#ifdef STE_HARDWARE
++    LightRefBase<GraphicBuffer> >,
++#else
++    RefBase >,
++#endif
+       public Flattenable<GraphicBuffer>
+ {
+     friend class Flattenable<GraphicBuffer>;
+diff --git a/include/ui/PixelFormat.h b/include/ui/PixelFormat.h
+index 19228c4..a1bee8d 100644
+--- a/include/ui/PixelFormat.h
++++ b/include/ui/PixelFormat.h
+@@ -61,8 +61,16 @@ enum {
+     PIXEL_FORMAT_RGB_888     = HAL_PIXEL_FORMAT_RGB_888,    // 3x8-bit RGB
+     PIXEL_FORMAT_RGB_565     = HAL_PIXEL_FORMAT_RGB_565,    // 16-bit RGB
+     PIXEL_FORMAT_BGRA_8888   = HAL_PIXEL_FORMAT_BGRA_8888,  // 4x8-bit BGRA
+-    PIXEL_FORMAT_RGBA_5551   = 6,                           // 16-bit ARGB
+-    PIXEL_FORMAT_RGBA_4444   = 7,                           // 16-bit ARGB
++    PIXEL_FORMAT_RGBA_5551   = HAL_PIXEL_FORMAT_RGBA_5551,  // 16-bit ARGB
++    PIXEL_FORMAT_RGBA_4444   = HAL_PIXEL_FORMAT_RGBA_4444,  // 16-bit ARGB
++    PIXEL_FORMAT_A_8         = 8,                           // 8-bit A
++#ifdef STE_HARDWARE
++    PIXEL_FORMAT_YCbCr_420_P  = HAL_PIXEL_FORMAT_YCbCr_420_P,
++    /* STE: Added Support for YUV42XMBN, required for Copybit CC acceleration */
++    PIXEL_FORMAT_YCBCR42XMBN  = HAL_PIXEL_FORMAT_YCBCR42XMBN,
++    /* STE: Added for YCbCr422R -> RGB888 use-case */
++    PIXEL_FORMAT_YCbCr_422_I  = HAL_PIXEL_FORMAT_YCbCr_422_I,
++#endif
+ };
+ 
+ typedef int32_t PixelFormat;
+diff --git a/include/ui/Region.h b/include/ui/Region.h
+index d906dbb..fb9783a 100644
+--- a/include/ui/Region.h
++++ b/include/ui/Region.h
+@@ -25,6 +25,10 @@
+ #include <ui/Rect.h>
+ #include <utils/Flattenable.h>
+ 
++#ifdef STE_HARDWARE
++#include <hardware/copybit.h>
++#endif
++
+ namespace android {
+ // ---------------------------------------------------------------------------
+ 
+@@ -210,6 +214,27 @@ Region& Region::operator -= (const Region& rhs) {
+ Region& Region::operator += (const Point& pt) {
+     return translateSelf(pt.x, pt.y);
+ }
++#ifdef STE_HARDWARE
++// ---------------------------------------------------------------------------
++
++struct region_iterator : public copybit_region_t {
++    region_iterator(const Region& region)
++        : b(region.begin()), e(region.end()) {
++        this->next = iterate;
++    }
++private:
++    static int iterate(copybit_region_t const * self, copybit_rect_t* rect) {
++        region_iterator const* me = static_cast<region_iterator const*>(self);
++        if (me->b != me->e) {
++            *reinterpret_cast<Rect*>(rect) = *me->b++;
++            return 1;
++        }
++        return 0;
++    }
++    mutable Region::const_iterator b;
++    Region::const_iterator const e;
++};
++#endif
+ // ---------------------------------------------------------------------------
+ }; // namespace android
+ 
+diff --git a/libs/binder/Android.mk b/libs/binder/Android.mk
+index cb17f78..5440ef3 100644
+--- a/libs/binder/Android.mk
++++ b/libs/binder/Android.mk
+@@ -34,6 +34,7 @@ sources := \
+     ProcessState.cpp \
+     Static.cpp \
+     TextOutput.cpp \
++    Timers.cpp \
+ 
+ ifeq ($(BOARD_NEEDS_MEMORYHEAPPMEM),true)
+ sources += \
+diff --git a/libs/binder/MemoryBase.cpp b/libs/binder/MemoryBase.cpp
+index 5c82330..88c6486 100644
+--- a/libs/binder/MemoryBase.cpp
++++ b/libs/binder/MemoryBase.cpp
+@@ -25,7 +25,9 @@
+ namespace android {
+ 
+ // ---------------------------------------------------------------------------
+-
++#ifdef STE_HARDWARE
++extern "C" void _ZN7android10MemoryBaseC2ERKNS_2spINS_11IMemoryHeapEEElj() __attribute__((alias("_ZN7android10MemoryBaseC1ERKNS_2spINS_11IMemoryHeapEEElj")));
++#endif
+ MemoryBase::MemoryBase(const sp<IMemoryHeap>& heap,
+         ssize_t offset, size_t size)
+     : mSize(size), mOffset(offset), mHeap(heap)
+@@ -43,6 +45,22 @@ MemoryBase::~MemoryBase()
+ {
+ }
+ 
++#ifdef STE_HARDWARE
++sp<IMemoryHeap> android::MemoryBase::getMemory(long* offset, unsigned int* size) const
++{
++    ssize_t offset_o;
++    size_t size_o;
++    sp<IMemoryHeap> res;
++
++    res = getMemory(&offset_o, & size_o);
++    *offset = offset_o;
++    *size = size_o;
++
++    return res;
++}
++#endif
++
++
+ // ---------------------------------------------------------------------------
+ }; // namespace android
+ 
+diff --git a/libs/binder/Timers.cpp b/libs/binder/Timers.cpp
+new file mode 100644
+index 0000000..eb0ba98
+--- /dev/null
++++ b/libs/binder/Timers.cpp
+@@ -0,0 +1,132 @@
++/*
++ * Copyright (C) 2005 The Android Open Source Project
++ *
++ * Licensed under the Apache License, Version 2.0 (the "License");
++ * you may not use this file except in compliance with the License.
++ * You may obtain a copy of the License at
++ *
++ *      http://www.apache.org/licenses/LICENSE-2.0
++ *
++ * Unless required by applicable law or agreed to in writing, software
++ * distributed under the License is distributed on an "AS IS" BASIS,
++ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++ * See the License for the specific language governing permissions and
++ * limitations under the License.
++ */
++
++//
++// Timer functions.
++//
++#include <binder/Timers.h>
++
++#include <stdlib.h>
++#include <stdio.h>
++#include <unistd.h>
++#include <sys/time.h>
++#include <time.h>
++#include <errno.h>
++#include <limits.h>
++
++#ifdef HAVE_WIN32_THREADS
++#include <windows.h>
++#endif
++
++nsecs_t systemTime(int clock)
++{
++#if defined(HAVE_POSIX_CLOCKS)
++    static const clockid_t clocks[] = {
++            CLOCK_REALTIME,
++            CLOCK_MONOTONIC,
++            CLOCK_PROCESS_CPUTIME_ID,
++            CLOCK_THREAD_CPUTIME_ID,
++            CLOCK_BOOTTIME
++    };
++    struct timespec t;
++    t.tv_sec = t.tv_nsec = 0;
++    clock_gettime(clocks[clock], &t);
++    return nsecs_t(t.tv_sec)*1000000000LL + t.tv_nsec;
++#else
++    // we don't support the clocks here.
++    struct timeval t;
++    t.tv_sec = t.tv_usec = 0;
++    gettimeofday(&t, NULL);
++    return nsecs_t(t.tv_sec)*1000000000LL + nsecs_t(t.tv_usec)*1000LL;
++#endif
++}
++
++int toMillisecondTimeoutDelay(nsecs_t referenceTime, nsecs_t timeoutTime)
++{
++    int timeoutDelayMillis;
++    if (timeoutTime > referenceTime) {
++        uint64_t timeoutDelay = uint64_t(timeoutTime - referenceTime);
++        if (timeoutDelay > uint64_t((INT_MAX - 1) * 1000000LL)) {
++            timeoutDelayMillis = -1;
++        } else {
++            timeoutDelayMillis = (timeoutDelay + 999999LL) / 1000000LL;
++        }
++    } else {
++        timeoutDelayMillis = 0;
++    }
++    return timeoutDelayMillis;
++}
++
++
++/*
++ * ===========================================================================
++ *      DurationTimer
++ * ===========================================================================
++ */
++
++using namespace android;
++
++// Start the timer.
++void DurationTimer::start(void)
++{
++    gettimeofday(&mStartWhen, NULL);
++}
++
++// Stop the timer.
++void DurationTimer::stop(void)
++{
++    gettimeofday(&mStopWhen, NULL);
++}
++
++// Get the duration in microseconds.
++long long DurationTimer::durationUsecs(void) const
++{
++    return (long) subtractTimevals(&mStopWhen, &mStartWhen);
++}
++
++// Subtract two timevals.  Returns the difference (ptv1-ptv2) in
++// microseconds.
++/*static*/ long long DurationTimer::subtractTimevals(const struct timeval* ptv1,
++    const struct timeval* ptv2)
++{
++    long long stop  = ((long long) ptv1->tv_sec) * 1000000LL +
++                      ((long long) ptv1->tv_usec);
++    long long start = ((long long) ptv2->tv_sec) * 1000000LL +
++                      ((long long) ptv2->tv_usec);
++    return stop - start;
++}
++
++// Add the specified amount of time to the timeval.
++/*static*/ void DurationTimer::addToTimeval(struct timeval* ptv, long usec)
++{
++    if (usec < 0) {
++        return;
++    }
++
++    // normalize tv_usec if necessary
++    if (ptv->tv_usec >= 1000000) {
++        ptv->tv_sec += ptv->tv_usec / 1000000;
++        ptv->tv_usec %= 1000000;
++    }
++
++    ptv->tv_usec += usec % 1000000;
++    if (ptv->tv_usec >= 1000000) {
++        ptv->tv_usec -= 1000000;
++        ptv->tv_sec++;
++    }
++    ptv->tv_sec += usec / 1000000;
++}
++
+diff --git a/libs/gui/Android.mk b/libs/gui/Android.mk
+index b42fa63..05b7b6a 100644
+--- a/libs/gui/Android.mk
++++ b/libs/gui/Android.mk
+@@ -37,6 +37,7 @@ LOCAL_SHARED_LIBRARIES := \
+ 	libsync \
+ 	libui \
+ 	libutils \
++	libhardware \
+ 	liblog
+ 
+ # Executed only on QCOM BSPs
+@@ -58,7 +59,7 @@ ifeq ($(TARGET_BOARD_PLATFORM), tegra3)
+ 	LOCAL_CFLAGS += -DDONT_USE_FENCE_SYNC
+ endif
+ ifeq ($(TARGET_TOROPLUS_RADIO), true)
+-	LOCAL_CFLAGS += -DTOROPLUS_RADIO
++        LOCAL_CFLAGS += -DTOROPLUS_RADIO
+ endif
+ 
+ include $(BUILD_SHARED_LIBRARY)
+diff --git a/libs/gui/GLConsumer.cpp b/libs/gui/GLConsumer.cpp
+index 7ee3081..e9080ce 100644
+--- a/libs/gui/GLConsumer.cpp
++++ b/libs/gui/GLConsumer.cpp
+@@ -133,13 +133,32 @@ GLConsumer::GLConsumer(const sp<IGraphicBufferConsumer>& bq, uint32_t tex,
+     mEglDisplay(EGL_NO_DISPLAY),
+     mEglContext(EGL_NO_CONTEXT),
+     mCurrentTexture(BufferQueue::INVALID_BUFFER_SLOT),
++#ifdef STE_HARDWARE
++    mNextBlitSlot(0),
++#endif
+     mAttached(true)
+ {
++#ifdef STE_HARDWARE
++    sp<ISurfaceComposer> composer(ComposerService::getComposerService());
++    mGraphicBufferAlloc = composer->createGraphicBufferAlloc();
++    if (mGraphicBufferAlloc == 0) {
++        ST_LOGE("createGraphicBufferAlloc() failed in SurfaceTexture()");
++    }
++#endif
+     ST_LOGV("GLConsumer");
+ 
+     memcpy(mCurrentTransformMatrix, mtxIdentity,
+             sizeof(mCurrentTransformMatrix));
+ 
++#ifdef STE_HARDWARE
++    hw_module_t const* module;
++    mBlitEngine = 0;
++    if (hw_get_module(COPYBIT_HARDWARE_MODULE_ID, &module) == 0) {
++        copybit_open(module, &mBlitEngine);
++    }
++    ALOGE_IF(!mBlitEngine, "Cannot open copybit mBlitEngine=%p", mBlitEngine);
++#endif
++
+     mConsumer->setConsumerUsageBits(DEFAULT_USAGE_FLAGS);
+ }
+ 
+@@ -371,6 +390,59 @@ status_t GLConsumer::updateAndReleaseLocked(const BufferQueue::BufferItem& item)
+     // means the buffer was previously acquired), if we destroyed the
+     // EGLImage when detaching from a context but the buffer has not been
+     // re-allocated.
++#ifdef STE_HARDWARE
++    sp<GraphicBuffer> textureBuffer;
++    if (conversionIsNeeded(mSlots[buf].mGraphicBuffer)) {
++        /* deallocate image each time .... */
++        if (mEglSlots[buf].mEglImage != EGL_NO_IMAGE_KHR) {
++            eglDestroyImageKHR(mEglDisplay, mEglSlots[buf].mEglImage);
++            mEglSlots[buf].mEglImage = EGL_NO_IMAGE_KHR;
++        }
++        /* test if source and convert buffer size are ok */
++        if (mSlots[buf].mGraphicBuffer != NULL && mBlitSlots[mNextBlitSlot] != NULL) {
++            sp<GraphicBuffer> &srcBuf = mSlots[buf].mGraphicBuffer;
++            sp<GraphicBuffer> &dstBuf = mBlitSlots[mNextBlitSlot];
++            if (srcBuf->getWidth() != dstBuf->getWidth() || srcBuf->getHeight() != dstBuf->getHeight()) {
++                mBlitSlots[mNextBlitSlot] = NULL;
++            }
++        }
++        /* allocate convert buffer if needed */
++        if (mBlitSlots[mNextBlitSlot] == NULL) {
++            sp<GraphicBuffer> &srcBuf = mSlots[buf].mGraphicBuffer;
++            status_t res = 0;
++            sp<GraphicBuffer> dstBuf(mGraphicBufferAlloc->createGraphicBuffer(srcBuf->getWidth(),
++                                                                              srcBuf->getHeight(),
++                                                                              PIXEL_FORMAT_RGBA_8888,
++                                                                              srcBuf->getUsage(),
++                                                                              &res));
++            if (dstBuf == 0) {
++                ST_LOGE("updateTexImage: SurfaceComposer::createGraphicBuffer failed");
++                return NO_MEMORY;
++            }
++            if (res != NO_ERROR) {
++                ST_LOGW("updateTexImage: SurfaceComposer::createGraphicBuffer error=%#04x", res);
++            }
++            mBlitSlots[mNextBlitSlot] = dstBuf;
++        }
++        /* allocate image */
++        EGLImageKHR image = createImage(mEglDisplay, mBlitSlots[mNextBlitSlot], Rect() );
++        if (image == EGL_NO_IMAGE_KHR) {
++            ST_LOGW("releaseAndUpdate: unable to createImage on display=%p slot=%d", mEglDisplay, buf);
++            return UNKNOWN_ERROR;
++        }
++        mEglSlots[buf].mEglImage = image;
++        /* convert buffer */
++        if (convert(mSlots[buf].mGraphicBuffer, mBlitSlots[mNextBlitSlot]) != OK) {
++            ALOGE("updateTexImage: convert failed");
++            return UNKNOWN_ERROR;
++        }
++        textureBuffer = mBlitSlots[mNextBlitSlot];
++        mNextBlitSlot = (mNextBlitSlot + 1) % NUM_BLIT_BUFFER_SLOTS;
++    } else {
++        textureBuffer = mSlots[buf].mGraphicBuffer;
++    }
++#endif
++
+     if (mEglSlots[buf].mEglImage == EGL_NO_IMAGE_KHR) {
+         EGLImageKHR image = createImage(mEglDisplay,
+                 mSlots[buf].mGraphicBuffer, item.mCrop);
+@@ -415,7 +487,11 @@ status_t GLConsumer::updateAndReleaseLocked(const BufferQueue::BufferItem& item)
+ 
+     // Update the GLConsumer state.
+     mCurrentTexture = buf;
++#ifndef STE_HARDWARE
+     mCurrentTextureBuf = mSlots[buf].mGraphicBuffer;
++#else
++    mCurrentTextureBuf = textureBuffer;
++#endif
+     mCurrentCrop = item.mCrop;
+     mCurrentTransform = item.mTransform;
+     mCurrentScalingMode = item.mScalingMode;
+@@ -1079,6 +1155,54 @@ void GLConsumer::dumpLocked(String8& result, const char* prefix) const
+     ConsumerBase::dumpLocked(result, prefix);
+ }
+ 
++#ifdef STE_HARDWARE
++bool GLConsumer::conversionIsNeeded(const sp<GraphicBuffer>& graphicBuffer) {
++    int fmt = graphicBuffer->getPixelFormat();
++    return (fmt == PIXEL_FORMAT_YCBCR42XMBN) || (fmt == PIXEL_FORMAT_YCbCr_420_P);
++}
++
++status_t GLConsumer::convert(sp<GraphicBuffer> &srcBuf, sp<GraphicBuffer> &dstBuf) {
++    copybit_image_t dstImg;
++    dstImg.w = dstBuf->getWidth();
++    dstImg.h = dstBuf->getHeight();
++    dstImg.format = dstBuf->getPixelFormat();
++    dstImg.handle = (native_handle_t*) dstBuf->getNativeBuffer()->handle;
++
++    copybit_image_t srcImg;
++    srcImg.w = srcBuf->getWidth();
++    srcImg.h = srcBuf->getHeight();
++    srcImg.format = srcBuf->getPixelFormat();
++    srcImg.base = NULL;
++    srcImg.handle = (native_handle_t*) srcBuf->getNativeBuffer()->handle;
++
++    copybit_rect_t dstCrop;
++    dstCrop.l = 0;
++    dstCrop.t = 0;
++    dstCrop.r = dstBuf->getWidth();
++    dstCrop.b = dstBuf->getHeight();
++
++    copybit_rect_t srcCrop;
++    srcCrop.l = 0;
++    srcCrop.t = 0;
++    srcCrop.r = srcBuf->getWidth();
++    srcCrop.b = srcBuf->getHeight();
++
++    region_iterator clip(Region(Rect(dstCrop.r, dstCrop.b)));
++    mBlitEngine->set_parameter(mBlitEngine, COPYBIT_TRANSFORM, 0);
++    mBlitEngine->set_parameter(mBlitEngine, COPYBIT_PLANE_ALPHA, 0xFF);
++    mBlitEngine->set_parameter(mBlitEngine, COPYBIT_DITHER, COPYBIT_ENABLE);
++
++    int err = mBlitEngine->stretch(
++            mBlitEngine, &dstImg, &srcImg, &dstCrop, &srcCrop, &clip);
++    if (err != 0) {
++        ALOGE("Error: Blit stretch operation failed (err:%d)", err);
++        //* TODO: Bad boy doing hacks here, we have to investigate why blit stretch operation fails sometimes
++        return OK;
++    }
++    return OK;
++}
++#endif
++
+ static void mtxMul(float out[16], const float a[16], const float b[16]) {
+     out[0] = a[0]*b[0] + a[4]*b[1] + a[8]*b[2] + a[12]*b[3];
+     out[1] = a[1]*b[0] + a[5]*b[1] + a[9]*b[2] + a[13]*b[3];
+diff --git a/libs/ui/PixelFormat.cpp b/libs/ui/PixelFormat.cpp
+index 0595315..45e6c67 100644
+--- a/libs/ui/PixelFormat.cpp
++++ b/libs/ui/PixelFormat.cpp
+@@ -90,6 +90,10 @@ status_t getPixelFormatInfo(PixelFormat format, PixelFormatInfo* info)
+     case HAL_PIXEL_FORMAT_YCbCr_422_I:
+         info->bitsPerPixel = 16;
+         goto done;
++#ifdef STE_HARDWARE
++    case HAL_PIXEL_FORMAT_YCbCr_420_P:
++    case HAL_PIXEL_FORMAT_YCBCR42XMBN:
++#endif
+     case HAL_PIXEL_FORMAT_YCrCb_420_SP:
+     case HAL_PIXEL_FORMAT_YV12:
+         info->bitsPerPixel = 12;
+diff --git a/services/surfaceflinger/SurfaceFlinger.cpp b/services/surfaceflinger/SurfaceFlinger.cpp
+index 529461e..0de7757 100644
+--- a/services/surfaceflinger/SurfaceFlinger.cpp
++++ b/services/surfaceflinger/SurfaceFlinger.cpp
+@@ -2908,6 +2908,7 @@ class GraphicProducerWrapper : public BBinder, public MessageHandler {
+     uint32_t code;
+     Parcel const* data;
+     Parcel* reply;
++    Mutex mLock;
+ 
+     enum {
+         MSG_API_CALL,
+@@ -2920,6 +2921,7 @@ class GraphicProducerWrapper : public BBinder, public MessageHandler {
+      */
+     virtual status_t transact(uint32_t code,
+             const Parcel& data, Parcel* reply, uint32_t flags) {
++        mLock.lock();
+         this->code = code;
+         this->data = &data;
+         this->reply = reply;
+@@ -2932,6 +2934,7 @@ class GraphicProducerWrapper : public BBinder, public MessageHandler {
+             looper->sendMessage(this, Message(MSG_API_CALL));
+             barrier.wait();
+         }
++        mLock.unlock();
+         return NO_ERROR;
+     }
+ 
+-- 
+1.8.1.2
+

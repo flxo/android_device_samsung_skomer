@@ -28,3 +28,40 @@ cd ..
 cd bionic
 git fetch http://review.cyanogenmod.org/CyanogenMod/android_bionic refs/changes/90/53390/1 && git checkout FETCH_HEAD
 cd ..
+
+# init: Allow load of lpm.rc by parsing a cmdline argument
+# 
+# A usage example could be:
+# BOARD_LPM_BOOT_ARGUMENT_NAME := lpm_boot
+# BOARD_LPM_BOOT_ARGUMENT_VALUE := 1
+# Where lpm_boot is the argument to read, and 1 the value of it when kernel says when should enter offline charging mode
+# Change-Id: I413ac98138547cca62f20e3dce3964fcd30ad483
+cd system/core
+git fetch http://review.cyanogenmod.org/CyanogenMod/android_system_core refs/changes/18/51718/1 && git cherry-pick FETCH_HEAD
+cd ../..
+
+# av: Add support for STE multimedia - Part 1
+#
+# Change-Id: I29d266340aad9acb69a7ad9e7d16701844621312
+cd frameworks/av
+#git fetch http://review.cyanogenmod.org/CyanogenMod/android_frameworks_av refs/changes/32/52032/3 && git cherry-pick FETCH_HEAD
+echo "patching rebased av: Add support for STE multimedia - Part 1"
+patch -p1 < ../../device/samsung/skomer/patches/0001-av-Add-support-for-STE-multimedia-Part-1.patch
+cd ../..
+
+# native: Add support for STE multimedia - Part 2
+#
+# Enourmous thanks to tecul for doing the perfect port and making everything clean and bugless.
+# Change-Id: Id14f2289fb0dc28e370d56530e5ae7bc86923a25
+cd frameworks/native
+#git fetch http://review.cyanogenmod.org/CyanogenMod/android_frameworks_native refs/changes/33/52033/4 && git cherry-pick FETCH_HEAD;
+echo "patching rebased: Add support for STE multimedia - Part 2"
+patch -p1 < ../../device/samsung/skomer/patches/0001-native-Add-support-for-STE-multimedia-Part-2.patch
+cd ../..
+
+# include: Add support for STE multimedia - Part 3
+#
+# Change-Id: If36cc36aa5328c0e85dfb99a07f2867bb94cca8e
+cd system/core
+git fetch http://review.cyanogenmod.org/CyanogenMod/android_system_core refs/changes/34/52034/2 && git cherry-pick FETCH_HEAD
+cd ../..
