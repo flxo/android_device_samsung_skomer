@@ -645,7 +645,7 @@ index 7ee3081..e9080ce 100644
 +            mBlitSlots[mNextBlitSlot] = dstBuf;
 +        }
 +        /* allocate image */
-+        EGLImageKHR image = createImage(mEglDisplay, mBlitSlots[mNextBlitSlot], Rect() );
++        EGLImageKHR image = createImage(mEglDisplay, mBlitSlots[mNextBlitSlot], item.mCrop );
 +        if (image == EGL_NO_IMAGE_KHR) {
 +            ST_LOGW("releaseAndUpdate: unable to createImage on display=%p slot=%d", mEglDisplay, buf);
 +            return UNKNOWN_ERROR;
