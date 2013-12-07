@@ -20,37 +20,31 @@
 
 * Description
 
-  This repository is for CM10.2 on Samsung X Cover 2 Mini a.k.a Samsung Skomer.
-  It's still a work in progress.
+  This repository is for Omnirom 4.3 on Samsung X Cover 2 Mini a.k.a Samsung Skomer.
 
-* How To Build CM10.2 for Samsung skomer
+* How To build:
 
   - Make a workspace
 
-  $ mkdir -p ~/cyanogenmod/system
-  $ cd ~/cyanogenmod/system
+  $ mkdir -p ~/omnirom
+  $ cd ~/omnirom
 
 
   - Do repo init & sync
 
-  $ repo init -u git://github.com/CyanogenMod/android.git -b cm-10.2
+  $ repo init -u git://github.com/omnirom/android.git -b android-4.3
 
 
   - Create .repo/local_manifests/skomer.xml with the following content:
 
   <?xml version="1.0" encoding="UTF-8"?>
   <manifest>
-      <project name="flxo/android_device_samsung_skomer" path="device/samsung/skomer" />
-      <project name="flxo/android_kernel_samsung_skomer" path="kernel/samsung/skomer" />
-      <project name="flxo/android_vendor_samsung_skomer" path="vendor/samsung/skomer" />
+      <project name="omnirom/android_device_samsung_skomer" path="device/samsung/skomer" remote="github" />
+      <project name="omnirom/android_vendor_samsung_skomer" path="vendor/samsung/skomer" remote="github" />
+      <project name="omnirom/android_kernel_samsung_skomer" path="kernel/samsung/skomer" remote="github" revision="jellybean" />
   </manifest>
 
   $ repo sync
-
-
-  - Setup vendor
-
-  $ ./vendor/cm/get-prebuilts
 
 
   - Pull all not merged fixes from gerrit:
@@ -60,19 +54,20 @@
   - Setup environment
 
   $ source build/envsetup.sh
-  $ lunch cm_skomer-eng
+  $ lunch omni_skomer-userdebug
 
 
-  - Build CM10.2
+  - Build
 
   $ export USE_CCACHE=1
-  $ make -j4 bacon
+  $ mka -jX otapackage
 
 
 * Thanks
 
-  Oliver!
+  OliverG86
   CyanogenMod
+  Omnirom
   alquez
   modpunk
   dudeman1996
