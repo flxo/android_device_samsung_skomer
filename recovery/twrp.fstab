@@ -1,0 +1,6 @@
+/system       ext4   /dev/block/mmcblk0p22
+/cache        ext4   /dev/block/mmcblk0p23
+/data         ext4   /dev/block/mmcblk0p25
+/efs          ext4   /dev/block/mmcblk0p11
+/external_sd  vfat   /dev/block/mmcblk1p1    flags=storage;wipeingui;removable
+/boot         emmc   /dev/block/mmcblk0p20

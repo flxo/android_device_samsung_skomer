@@ -5,6 +5,7 @@ on early-fs
     mkdir /mnt 0775 root root
     mkdir /mnt/.lfs 0755 root root
     mkdir /efs
+    mkdir /external_sd
 
     mount ext4 /dev/block/mmcblk0p11 /efs nosuid nodev noatime wait
 
