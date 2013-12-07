@@ -17,10 +17,6 @@
 
 DEVICE_PACKAGE_OVERLAYS += $(LOCAL_PATH)/overlay
 
-# Inherit from those products. Most specific first.
-$(call inherit-product, build/target/product/full_base_telephony.mk)
-$(call inherit-product, build/target/product/languages_full.mk)
-
 # Use the Dalvik VM specific for devices with 1024 MB of RAM
 $(call inherit-product, frameworks/native/build/phone-xhdpi-1024-dalvik-heap.mk)
 
@@ -39,7 +35,8 @@ PRODUCT_COPY_FILES += \
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/recovery/init.recovery.samsungskomer.rc:root/init.recovery.samsungskomer.rc \
     $(LOCAL_PATH)/recovery/lib/modules/j4fs.ko:recovery/root/lib/modules/j4fs.ko \
-    $(LOCAL_PATH)/recovery/lib/modules/param.ko:recovery/root/lib/modules/param.ko
+    $(LOCAL_PATH)/recovery/lib/modules/param.ko:recovery/root/lib/modules/param.ko \
+    $(LOCAL_PATH)/recovery/twrp.fstab:recovery/root/etc/twrp.fstab
 
 # Inputs
 PRODUCT_COPY_FILES += \

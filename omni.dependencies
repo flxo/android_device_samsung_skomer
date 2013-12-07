@@ -1,0 +1,20 @@
+[
+  {
+    "remote": "github",
+    "repository": "flxo/android_device_samsung_skomer",
+    "target_path": "device/samsung/skomer",
+    "revision":    "android-4.3"
+  },
+  {
+    "remote": "github",
+    "repository": "flxo/android_kernel_samsung_skomer",
+    "target_path": "kernel/samsung/skomer",
+    "revision":    "jellybean"
+  },
+  {
+    "remote": "github",
+    "repository": "flxo/android_vendor_samsung_skomer",
+    "target_path": "vendor/samsung/skomer",
+    "revision":    "android-4.3"
+  }
+]
