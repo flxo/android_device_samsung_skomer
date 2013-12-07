@@ -1,14 +1,5 @@
 #!/bin/bash
 
-# frameworks_av: Support pre-KitKat audio blobs
-#
-# Patch Set 2: Combined duplicated method
-# Change-Id: I6384c13b0944a25cdf0cb90031b2e3698bc3e78d
-# Signed-off-by: Jorge Ruesga <jorge@ruesga.com>
-cd frameworks/av
-git fetch http://review.cyanogenmod.org/CyanogenMod/android_frameworks_av refs/changes/24/53324/2 && git checkout FETCH_HEAD
-cd ../..
-
 # build: Add SKIP_SET_METADATA flag
 #
 # On some of the older devices the recovery doesn't support
