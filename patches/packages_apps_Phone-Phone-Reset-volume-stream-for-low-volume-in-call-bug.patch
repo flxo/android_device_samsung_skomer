@@ -1,0 +1,109 @@
+From 077510711b24e3e59f162c3553ee8233480b381b Mon Sep 17 00:00:00 2001
+From: h3llrais3r <h3llrais3r@ubuntu-ext.(none)>
+Date: Wed, 13 Nov 2013 21:59:37 +0100
+Subject: [PATCH] Phone: Reset volume stream for low volume in call bug
+
+Change-Id: I5c11264cf8f8dae1214e136a0b6d0f5ecc9b3ef6
+
+Conflicts:
+	src/com/android/phone/PhoneUtils.java
+---
+ src/com/android/phone/InCallScreen.java | 18 ++++++++++++++++++
+ src/com/android/phone/PhoneUtils.java   | 31 +++++++++++++++++++++++++++++++
+ 2 files changed, 49 insertions(+)
+
+diff --git a/src/com/android/phone/InCallScreen.java b/src/com/android/phone/InCallScreen.java
+index bd24b8e..0dd97eb 100755
+--- a/src/com/android/phone/InCallScreen.java
++++ b/src/com/android/phone/InCallScreen.java
+@@ -1651,6 +1651,12 @@ public class InCallScreen extends Activity
+         // Make sure we update the poke lock and wake lock when certain
+         // phone state changes occur.
+         mApp.updateWakeState();
++
++        // Fix for low in-call volume bug.
++        // Reset the audio volume stream when phone state is OFFHOOK.
++        if (state == PhoneConstants.State.OFFHOOK) {
++            PhoneUtils.resetAudioStreamVolume();
++        }
+     }
+ 
+     /**
+@@ -2816,6 +2822,10 @@ public class InCallScreen extends Activity
+         }
+         PhoneUtils.turnOnSpeaker(this, newSpeakerState, true);
+ 
++        // Fix for low in-call volume bug.
++        // Reset the audio volume stream when switching between speaker and earpiece.
++        PhoneUtils.resetAudioStreamVolume();
++
+         // And update the InCallTouchUi widget (since the "audio mode"
+         // button might need to change its appearance based on the new
+         // audio state.)
+@@ -2868,6 +2878,10 @@ public class InCallScreen extends Activity
+             Log.w(LOG_TAG, "toggleBluetooth(): bluetooth is unavailable");
+         }
+ 
++        // Fix for low in-call volume bug.
++        // Reset the audio volume stream when switching between normal call audio and bluetooth.
++        PhoneUtils.resetAudioStreamVolume();
++
+         // And update the InCallTouchUi widget (since the "audio mode"
+         // button might need to change its appearance based on the new
+         // audio state.)
+@@ -2932,6 +2946,10 @@ public class InCallScreen extends Activity
+                 break;
+         }
+ 
++        // Fix for low in-call volume bug.
++        // Reset the audio stream volume after switch between in-call audio.
++        PhoneUtils.resetAudioStreamVolume();
++
+         // And finally, update the InCallTouchUi widget (since the "audio
+         // mode" button might need to change its appearance based on the
+         // new audio state.)
+diff --git a/src/com/android/phone/PhoneUtils.java b/src/com/android/phone/PhoneUtils.java
+index 72ea7ba..551f84f 100644
+--- a/src/com/android/phone/PhoneUtils.java
++++ b/src/com/android/phone/PhoneUtils.java
+@@ -1904,6 +1904,37 @@ public class PhoneUtils {
+     }
+ 
+     /**
++     * Reset the audio stream volume to fix the low in-call volume bug.
++     *
++     * Due to a bug in the OMX system, the audio stream volume is set to 0 after it was set to it's default volume.
++     * Calling PhoneUtils.resetAudioStreamVolume() triggers the system to reset the volume.
++     *
++     * This should be called on every place where is switched between audio modes.
++     *
++     * REMARK: I think it only appears on the voice call stream, but to be sure I also do it on the bluetooth stream.
++     */
++    static void resetAudioStreamVolume() {
++        PhoneGlobals app = PhoneGlobals.getInstance();
++        AudioManager audioManager = (AudioManager) app.getSystemService(Context.AUDIO_SERVICE);
++        // determine actual streamType
++        int streamType = AudioManager.STREAM_VOICE_CALL;
++        if (app.isBluetoothHeadsetAudioOn()) {
++            streamType = AudioManager.STREAM_BLUETOOTH_SCO;
++        }
++        // determine volume and 1 level lower volume (lowest level can be 0)
++        int volume = audioManager.getStreamVolume(streamType);
++        int lowerVolume = volume - 1;
++        if (lowerVolume < 0) {
++            lowerVolume = 0;
++        }
++        log("resetAudioStreamVolume (streamType=" + streamType + ", streamVolume=" + volume + ")...");
++        // It's important to change it to another volume before restoring the original volume,
++        // otherwise the volume change will NOT be triggered!!
++        audioManager.setStreamVolume(streamType, lowerVolume, 0);
++        audioManager.setStreamVolume(streamType, volume, 0);
++    }
++
++    /**
+      *
+      * Mute / umute the foreground phone, which has the current foreground call
+      *
+-- 
+1.8.1.2
+
