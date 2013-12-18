@@ -822,6 +822,13 @@ OMX_ERRORTYPE omx_base_component_GetComponentVersion(OMX_HANDLETYPE hComponent,
   /* Fill spec version (copy from component field) */
   memcpy(pSpecVersion, &omx_component->nVersion, sizeof(OMX_VERSIONTYPE));
 
+  /* Fill UUID with handle address, PID and UID.
+   * This should guarantee uiniqness */
+  uuid[0] = (OMX_U32)omx_component;
+  uuid[1] = getpid();
+  uuid[2] = getuid();
+  memcpy(*pComponentUUID, uuid, sizeof(uuid));
+
   DEBUG(DEB_LEV_FUNCTION_NAME, "Out of %s for component %x\n", __func__, (int)hComponent);
   return OMX_ErrorNone;
 }
