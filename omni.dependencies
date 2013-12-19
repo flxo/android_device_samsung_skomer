@@ -3,7 +3,7 @@
     "remote": "github",
     "repository": "flxo/android_device_samsung_skomer",
     "target_path": "device/samsung/skomer",
-    "revision":    "android-4.3"
+    "revision":    "android-4.4"
   },
   {
     "remote": "github",
@@ -15,6 +15,6 @@
     "remote": "github",
     "repository": "flxo/android_vendor_samsung_skomer",
     "target_path": "vendor/samsung/skomer",
-    "revision":    "android-4.3"
+    "revision":    "android-4.4"
   }
 ]

@@ -20,7 +20,7 @@
 
 * Description
 
-  This repository is for Omnirom 4.3 on Samsung X Cover 2 Mini a.k.a Samsung Skomer.
+  This repository is for Omnirom 4.4 on Samsung X Cover 2 Mini a.k.a Samsung Skomer.
 
 * How To build:
 
@@ -32,7 +32,7 @@
 
   - Do repo init & sync
 
-  $ repo init -u git://github.com/omnirom/android.git -b android-4.3
+  $ repo init -u git://github.com/omnirom/android.git -b android-4.4
 
 
   - Create .repo/local_manifests/skomer.xml with the following content:
@@ -45,10 +45,6 @@
   </manifest>
 
   $ repo sync
-
-
-  - Pull all not merged fixes from gerrit:
-  $ ./device/samsung/skomer/pull
 
 
   - Setup environment
@@ -65,7 +61,7 @@
 
 * Thanks
 
-  OliverG86
+  OliverG96
   CyanogenMod
   Omnirom
   alquez

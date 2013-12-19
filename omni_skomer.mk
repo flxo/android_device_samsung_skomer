@@ -37,4 +37,4 @@ PRODUCT_MANUFACTURER := samsung
 
 # Set build fingerprint and ID
 BUILD_ID := $(shell date -u +%Y%m%d)
-PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=omni_skomer BUILD_FINGERPRINT=omni/omni_skomer/skomer:4.3.1/$(BUILD_ID) PRIVATE_BUILD_DESC="GT-S7710 4.3.1"
+PRODUCT_BUILD_PROP_OVERRIDES += PRODUCT_NAME=omni_skomer BUILD_FINGERPRINT=omni/omni_skomer/skomer:4.4.2/$(BUILD_ID) PRIVATE_BUILD_DESC="GT-S7710 4.4.2"
