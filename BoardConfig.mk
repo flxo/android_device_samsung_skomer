@@ -118,6 +118,7 @@ TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/musb-ux500.0/musb-hdrc
 DEVICE_RESOLUTION := 480x800
 RECOVERY_GRAPHICS_USE_LINELENGTH := true
 RECOVERY_SDCARD_ON_DATA := true
+TARGET_RECOVERY_FSTAB := device/samsung/skomer/rootdir/fstab.samsungskomer
 TW_HAS_NO_RECOVERY_PARTITION := true
 TW_FLASH_FROM_STORAGE := true
 TW_EXTERNAL_STORAGE_PATH := "/storage/sdcard1"
