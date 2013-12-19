@@ -113,12 +113,6 @@ BOARD_LPM_BOOT_ARGUMENT_VALUE := 1
 # Recovery
 BOARD_UMS_LUNFILE := "/sys/devices/platform/musb-ux500.0/musb-hdrc/gadget/lun0/file"
 TARGET_USE_CUSTOM_LUN_FILE_PATH := "/sys/devices/platform/musb-ux500.0/musb-hdrc/gadget/lun%d/file"
-TARGET_RECOVERY_FSTAB := device/samsung/skomer/rootdir/fstab.samsungskomer
-RECOVERY_FSTAB_VERSION := 2
-BOARD_HAS_NO_MISC_PARTITION := true
-BOARD_CUSTOM_GRAPHICS := ../../../device/samsung/skomer/recovery/graphics.c
-BOARD_HAS_NO_SELECT_BUTTON := true
-BOARD_SUPPRESS_EMMC_WIPE := true
 
 # TWRP flags
 DEVICE_RESOLUTION := 480x800
